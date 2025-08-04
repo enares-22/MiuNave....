@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>MiuNave</title>
+  <link rel="stylesheet" href="miunave.css" />
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet" />
+</head>
+<body class="modo-claro">
+  <header>
+    <h1 class="titulo">MiuNave</h1>
+    <div class="config-icon" id="configBtn" title="Configuración">
+      <i data-lucide="settings" class="icono-config"></i>
+    </div>
+    <div class="menu-config" id="menuConfig" style="display:none;">
+      <button id="toggleModo">Cambiar a Modo Oscuro</button>
+    </div>
+  </header>
+
+  <main class="contenido">  
+    <section id="inicio" class="seccion-activa">
+      <h2>Playlists Populares</h2>
+      <div id="playlists" class="playlists"></div>
+    </section>
+
+    <section id="buscar" class="seccion-oculta">
+      <h2>Buscar</h2>
+      <p>Acá va la sección Buscar (vacía por ahora).</p>
+    </section>
+
+    <section id="descargas" class="seccion-oculta">
+      <h2>Descargas</h2>
+      <input
+        type="text"
+        id="busquedaMP3"
+        placeholder="Buscar MP3..."
+        class="barra-busqueda"
+      />
+      <ul id="listaMP3"></ul>
+      <div id="cargaCanciones">
+        <label for="inputMP3" class="boton-cargar">🎵 Cargar MP3</label>
+        <input type="file" id="inputMP3" accept="audio/mpeg" multiple hidden />
+      </div>
+    </section>
+
+    <section id="chats" class="seccion-oculta">
+      <h2>Chats</h2>
+      <section id="chatSection">
+        <div class="chat-container">
+          <div class="chat-list">
+            <div class="chat-user" data-user="pipi">
+              <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS2sPzGzN7w0X4KxmnhHVLq3MaODBcCWw79oA&s" alt="pipi" />
+              <span>pipi</span>
+            </div>
+            <div class="chat-user" data-user="lucho">
+              <img src="https://statics.eleconomista.com.ar/2024/08/crop/66c4c5a64411f__950x512.webp" alt="lucho" />
+              <span>lucho</span>
+            </div>
+          </div>
+          <div class="chat-window">
+            <div class="chat-header" id="chatHeader">Elegí un chat</div>
+            <div class="chat-messages" id="chatMessages"></div>
+            <div class="chat-input">
+              <input type="text" id="chatInput" placeholder="Escribí un mensaje..." />
+              <button id="sendMsgBtn">➤</button>
+            </div>
+          </div>
+        </div>
+      </section>
+    </section>
+
+    <section id="ecualizador" class="seccion-oculta">
+      <h2>Ecualizador</h2>
+      <p>Acá va la sección Ecualizador (vacía por ahora).</p>
+    </section>
+  </main>
+
+  <div id="miniReproductor" class="mini-reproductor" style="display:none;">
+    <div class="info">
+      <strong id="nombrePlaylist"></strong>
+      <ul id="listaCanciones"></ul>
+    </div>
+    <div class="controles">
+      <button id="btnShuffle" title="Aleatorio"><i class="fa-solid fa-shuffle"></i></button>
+      <button id="btnPrev" title="Anterior"><i class="fa-solid fa-backward-step"></i></button>
+      <button id="btnPlayPause" title="Play/Pausa"><i class="fa-solid fa-play"></i></button>
+      <button id="btnNext" title="Siguiente"><i class="fa-solid fa-forward-step"></i></button>
+      <button id="btnLoop" title="Repetir"><i class="fa-solid fa-repeat"></i></button>
+      <button id="btnDownload" title="Descargar canción"><i class="fa-solid fa-download"></i></button>
+      <button id="btnMenuCanciones" title="Mostrar lista de canciones"><i class="fa-solid fa-list"></i></button>
+    </div>
+    <div id="barraProgreso" class="barra-progreso" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"></div>
+  </div>
+
+  <div id="menuCanciones" class="menu-canciones seccion-oculta" style="display:none;">
+    <button id="btnCerrarMenu" class="btn-cerrar-menu" title="Cerrar menú canciones">&times;</button>
+    <h2>Lista de canciones</h2>
+    <ul id="listaMenuCanciones"></ul>
+  </div>
+
+  <audio id="audio" src=""></audio>
+
+  <nav class="botonera">
+    <button class="btn-nav activo" data-seccion="inicio">
+      <i data-lucide="home"></i>
+      <span>Inicio</span>
+    </button>
+    <button class="btn-nav" data-seccion="buscar">
+      <i data-lucide="search"></i>
+      <span>Buscar</span>
+    </button>
+    <button class="btn-nav" data-seccion="descargas">
+      <i data-lucide="download"></i>
+      <span>Descargas</span>
+    </button>
+    <button class="btn-nav" data-seccion="chats">
+      <i data-lucide="message-square"></i>
+      <span>Chats</span>
+    </button>
+    <button class="btn-nav" data-seccion="ecualizador">
+      <i data-lucide="sliders"></i>
+      <span>Ecualizador</span>
+    </button>
+  </nav>
+
+  <script src="miunave.js" defer></script>
+  <script>
+    window.addEventListener('DOMContentLoaded', () => {
+      lucide.createIcons();
+    });
+  </script>
+</body>
+</html>
