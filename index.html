@@ -140,6 +140,25 @@
     <section id="ecualizador" class="seccion-oculta">
       <h2>Ecualizador</h2>
 
+  
+  <div class="ecualizador-controles">
+    <div class="control-ecualizador">
+      <label for="bass">Bajos (60Hz)</label>
+      <input type="range" id="bass" min="-30" max="30" value="0">
+    </div>
+
+    <div class="control-ecualizador">
+      <label for="mid">Medios (1kHz)</label>
+      <input type="range" id="mid" min="-30" max="30" value="0">
+    </div>
+
+    <div class="control-ecualizador">
+      <label for="treble">Agudos (12kHz)</label>
+      <input type="range" id="treble" min="-30" max="30" value="0">
+    </div>
+  </div>
+</section>
+
     </section>
   </main>
 
@@ -177,6 +196,13 @@
     <i class="fa-solid fa-list"></i>
   </button>
 </div>
+
+<!-- Control de volumen -->
+<div class="volume-control">
+  <button id="mute-btn">🔊</button>
+  <input id="volume-slider" type="range" min="0" max="1" step="0.01" value="1">
+</div>
+
 <div id="barraProgresoContainer" class="barra-progreso-container">
   <div id="barraProgreso" class="barra-progreso"
        role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"></div>
@@ -221,4 +247,5 @@
   </script>
 </body>
 </html>
+
 
