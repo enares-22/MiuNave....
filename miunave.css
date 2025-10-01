@@ -387,6 +387,25 @@ body.modo-oscuro .playlist-item:hover {
   color: white;
 }
 
+.volume-control {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 5px;
+}
+
+.volume-control button {
+  background: none;
+  border: none;
+  font-size: 1.4rem;
+  cursor: pointer;
+}
+
+.volume-control input[type="range"] {
+  width: 100px;
+  cursor: pointer;
+}
+
 
 /* Botonera inferior */
 .botonera {
@@ -1659,6 +1678,140 @@ body.modo-oscuro #sendMsgBtn:hover {
   background-color: #7a0db9;
 }
 
+
+.ecualizador-controles {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-width: 300px;
+  margin: 15px auto;
+  padding: 10px;
+  background: var(--fondo-secundario, #f4f4f4);
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+/* 🎛️ Contenedor principal */
+#ecualizador {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
+}
+
+#ecualizador h2 {
+  font-size: 1.8rem;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+/* 📐 Caja de sliders */
+.ecualizador-controles {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  width: 80%;
+  max-width: 600px;
+  background: var(--fondo-secundario);
+  padding: 20px;
+  border-radius: 16px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+  transition: background 0.3s, box-shadow 0.3s;
+}
+
+.control-ecualizador {
+  display: flex;
+  flex-direction: column;
+}
+
+.control-ecualizador label {
+  font-size: 1rem;
+  font-weight: 500;
+  margin-bottom: 6px;
+}
+
+/* 🎚️ Estilo base de la barra */
+.control-ecualizador input[type="range"] {
+  width: 100%;
+  height: 10px;
+  border-radius: 5px;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  background: linear-gradient(90deg, #4a90e2, #8a2be2);
+  accent-color: #4a90e2;
+  transition: background 0.3s;
+}
+
+/* ⚪ Pulgar (modo claro por defecto) */
+.control-ecualizador input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 22px;
+  height: 22px;
+  background: #fff;
+  border: 3px solid #4a90e2;
+  border-radius: 50%;
+  box-shadow: 0 0 5px rgba(0,0,0,0.2);
+  cursor: pointer;
+  transition: transform 0.2s, background 0.3s, border 0.3s;
+}
+.control-ecualizador input[type="range"]::-webkit-slider-thumb:hover {
+  transform: scale(1.1);
+}
+
+.control-ecualizador input[type="range"]::-moz-range-thumb {
+  width: 22px;
+  height: 22px;
+  background: #fff;
+  border: 3px solid #4a90e2;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+/* 🌞 Modo claro */
+body.modo-claro {
+  --fondo-secundario: #f4f4f4;
+  color: #222;
+}
+
+body.modo-claro #ecualizador h2 {
+  color: #222;
+}
+
+/* 🌙 Modo oscuro */
+body.modo-oscuro {
+  --fondo-secundario: #1e1e1e;
+  color: #eee;
+}
+
+body.modo-oscuro #ecualizador h2 {
+  color: #fff;
+}
+
+body.modo-oscuro .ecualizador-controles {
+  box-shadow: 0 4px 15px rgba(0,0,0,0.6);
+}
+
+/* 🌙 Barra de ecualizador modo oscuro */
+body.modo-oscuro .control-ecualizador input[type="range"] {
+  background: linear-gradient(90deg, #8a2be2, #00eaff); /* violeta a celeste neón */
+}
+
+/* 🌙 Pulgar modo oscuro */
+body.modo-oscuro .control-ecualizador input[type="range"]::-webkit-slider-thumb {
+  background: #222;
+  border: 3px solid #8a2be2;
+  box-shadow: 0 0 6px #8a2be2;
+}
+
+body.modo-oscuro .control-ecualizador input[type="range"]::-moz-range-thumb {
+  background: #222;
+  border: 3px solid #8a2be2;
+  box-shadow: 0 0 6px #8a2be2;
+}
+
+
 /* Responsive básico */
 
 /* Tablets (768px - 1024px) */
@@ -1780,6 +1933,16 @@ body.modo-oscuro #sendMsgBtn:hover {
   #sendMsgBtn {
     padding: 0 12px;
     font-size: 1.1rem;
+  }
+}
+
+@media screen and (max-width: 900px) {
+  .ecualizador-controles {
+    width: 95%;
+    padding: 18px;
+  }
+  .control-ecualizador label {
+    font-size: 0.95rem;
   }
 }
 
@@ -1963,5 +2126,27 @@ body.modo-oscuro #sendMsgBtn:hover {
   #sendMsgBtn {
     padding: 0 10px;
     font-size: 1rem;
+  }
+}
+
+@media screen and (max-width: 600px) {
+  .ecualizador-controles {
+    width: 100%;
+    padding: 15px;
+    gap: 14px;
+  }
+  .control-ecualizador label {
+    font-size: 0.9rem;
+  }
+  .control-ecualizador input[type="range"] {
+    height: 8px;
+  }
+  .control-ecualizador input[type="range"]::-webkit-slider-thumb {
+    width: 20px;
+    height: 20px;
+  }
+  .control-ecualizador input[type="range"]::-moz-range-thumb {
+    width: 20px;
+    height: 20px;
   }
 }
