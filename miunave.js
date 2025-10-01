@@ -575,6 +575,40 @@ btnLoop.addEventListener("click", () => {
   }
 });
 
+// Seleccionamos los elementos del control de volumen
+
+const muteBtn = document.getElementById('mute-btn');
+const volumeSlider = document.getElementById('volume-slider');
+
+// Inicializamos volumen
+audio.volume = 1;
+
+// Cambiar volumen desde el slider
+volumeSlider.addEventListener('input', () => {
+  audio.volume = parseFloat(volumeSlider.value);
+
+  if (audio.volume === 0) {
+    muteBtn.textContent = '🔇';
+  } else {
+    muteBtn.textContent = '🔊';
+  }
+});
+
+// Mute / Unmute con el botón
+muteBtn.addEventListener('click', () => {
+  if (audio.volume > 0) {
+    audio.dataset.lastVolume = audio.volume; // guardamos el volumen anterior
+    audio.volume = 0;
+    volumeSlider.value = 0;
+    muteBtn.textContent = '🔇';
+  } else {
+    const lastVolume = audio.dataset.lastVolume || 1;
+    audio.volume = lastVolume;
+    volumeSlider.value = lastVolume;
+    muteBtn.textContent = '🔊';
+  }
+});
+
 
 const barraProgresoContainer = document.getElementById("barraProgresoContainer");
 barraProgresoContainer.addEventListener("click", e => {
@@ -871,6 +905,63 @@ document.querySelectorAll(".btn-nav").forEach(boton => {
         aplicarColoresModo();
     });
 });
+
+
+  document.addEventListener('DOMContentLoaded', () => {
+    const audioElement = document.getElementById('audio');
+
+    // 🎧 Creamos el contexto de audio y los nodos de ecualización
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const source = audioCtx.createMediaElementSource(audioElement);
+
+    const bassEQ = audioCtx.createBiquadFilter();
+    bassEQ.type = "lowshelf";
+    bassEQ.frequency.value = 60;
+
+    const midEQ = audioCtx.createBiquadFilter();
+    midEQ.type = "peaking";
+    midEQ.Q.value = Math.SQRT1_2;
+    midEQ.frequency.value = 1000;
+
+    const trebleEQ = audioCtx.createBiquadFilter();
+    trebleEQ.type = "highshelf";
+    trebleEQ.frequency.value = 12000;
+
+    const gainNode = audioCtx.createGain();
+
+    // 🔗 Conectamos: fuente → filtros → ganancia → salida
+    source.connect(bassEQ);
+    bassEQ.connect(midEQ);
+    midEQ.connect(trebleEQ);
+    trebleEQ.connect(gainNode);
+    gainNode.connect(audioCtx.destination);
+
+    // 🎚️ Controladores de ecualizador
+    const bassControl = document.getElementById('bass');
+    const midControl = document.getElementById('mid');
+    const trebleControl = document.getElementById('treble');
+
+    bassControl.addEventListener('input', () => {
+      bassEQ.gain.value = parseFloat(bassControl.value);
+    });
+
+    midControl.addEventListener('input', () => {
+      midEQ.gain.value = parseFloat(midControl.value);
+    });
+
+    trebleControl.addEventListener('input', () => {
+      trebleEQ.gain.value = parseFloat(trebleControl.value);
+    });
+
+    // 🌀 Importante: activar el contexto al reproducir
+    audioElement.addEventListener('play', () => {
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+    });
+  });
+
+
 // Inicialización
 async function inicializar() {
     await abrirDB();
@@ -881,5 +972,3 @@ async function inicializar() {
     miniReproductor.style.display = "none";
 }
 window.addEventListener("load", inicializar);
-
-
