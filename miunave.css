@@ -10,13 +10,13 @@
 /* Body y modos */
 
 body.modo-claro {
-  background: #a0b8d8;
+  background: #6b7286;
   background-image:
-    radial-gradient(2px 2px at 20px 30px, #2a53a2, transparent),
-    radial-gradient(2px 2px at 50px 80px, #2361c3, transparent),
-    radial-gradient(2px 2px at 110px 150px, #2144b0, transparent),
+    radial-gradient(2px 2px at 20px 30px, #001133, transparent),
+    radial-gradient(2px 2px at 50px 80px, #002157, transparent),
+    radial-gradient(2px 2px at 110px 150px, #212b49, transparent),
     radial-gradient(2px 2px at 180px 120px, #1b2a60, transparent),
-    radial-gradient(2px 2px at 240px 50px, #3c79e7, transparent);
+    radial-gradient(2px 2px at 240px 50px, #002466, transparent);
   background-repeat: repeat;
   background-size: 300px 200px;
   animation: moverEstrellas 60s linear infinite;
@@ -38,6 +38,10 @@ body.modo-oscuro {
 @keyframes moverEstrellas {
   from { background-position: 0 0; }
   to { background-position: 300px 200px; }
+}
+
+body {
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
 }
 
 /* Header */
@@ -78,7 +82,7 @@ body.modo-oscuro .config-icon .icono-config {
 }
 
 .config-icon:hover .icono-config {
-  stroke: orange;
+  stroke: rgb(183, 0, 255);
 }
 
 /* Menú configuración */
@@ -117,7 +121,7 @@ body.modo-oscuro .menu-config button {
 }
 
 .menu-config button:hover {
-  color: orange;
+  color: violet;
 }
 
 /* Contenido principal */
@@ -147,13 +151,15 @@ body.modo-oscuro main.contenido section h2 {
   color: #a0d8f7;
 }
 
-/* Playlists */
+/* Contenedor playlists */
 .playlists {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
+  display: grid;
+  grid-template-columns: repeat(4, 160px); /* 4 columnas fijas */
+  grid-template-rows: repeat(2, 160px);    /* 2 filas fijas */
   gap: 3rem;
-  padding: 1rem 4;
+  justify-content: center;
+  align-content: center;
+  padding: 2rem;
 }
 
 /* Playlists circulares */
@@ -169,11 +175,11 @@ body.modo-oscuro main.contenido section h2 {
   flex-direction: column;
   justify-content: flex-end;
   padding: 1rem;
-  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
   background-size: cover;
   background-position: center;
   user-select: none;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
 }
 
 /* Glow neón para playlist activa o hover - modo claro */
@@ -184,99 +190,113 @@ body.modo-claro .playlist-item:hover {
     0 0 20px 5px #1e90ff,
     0 0 30px 10px #1e90ff;
   transform: scale(1.07);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 /* Glow neón para playlist activa o hover - modo oscuro */
 body.modo-oscuro .playlist-item.activo,
 body.modo-oscuro .playlist-item:hover {
   box-shadow:
-    0 0 8px 2px orange,
-    0 0 20px 5px orange,
-    0 0 30px 10px orange;
+    0 0 8px 2px violet,
+    0 0 20px 5px violet,
+    0 0 30px 10px violet;
   transform: scale(1.07);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
+/* Hover base */
 .playlist-item:hover {
   transform: scale(1.05);
-  box-shadow: 0 8px 16px rgba(0,0,0,0.35);
-    padding: 0.5rem 1rem;
-  border-radius: 10px;
+}
+
+
+.btn-eliminar {
+  background: transparent;
+  border: none;
   cursor: pointer;
-  text-align: center;
+  color: #ff4d4d;
+  padding: 6px;
+  border-radius: 6px;
+  transition: color 0.3s ease, filter 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-eliminar:hover {
+  color: orange;
+  filter: drop-shadow(0 0 5px orange);
 }
 
 /* Botonera */
+
 .botonera {
-  background: #0a3d91; /* azul modo claro */
+  background: #0a3d91;
   transition: background-color 0.3s ease;
 }
 
 body.modo-oscuro .botonera {
-  background: #2c2c2c; /* gris oscuro para modo oscuro */
+  background: #2c2c2c; 
 }
 
 /* Botones de la botonera */
 .botonera .btn-nav {
-  color: white; /* modo claro */
+  color: white; 
   transition: color 0.3s ease;
 }
 
 body.modo-oscuro .botonera .btn-nav {
-  color: #a020f0; /* violeta modo oscuro */
+  color: #a020f0; 
 }
 
 .botonera .btn-nav.activo,
 .botonera .btn-nav:hover {
-  color: orange !important;
+  color: rgb(255, 238, 0) !important;
 }
 
 /* Íconos dentro de botones */
 .botonera .btn-nav i {
-  stroke: white; /* modo claro */
+  stroke: white; 
   transition: stroke 0.3s ease;
 }
 
 body.modo-oscuro .botonera .btn-nav i {
-  stroke: #a020f0; /* violeta modo oscuro */
+  stroke: #a020f0; 
 }
 
 .botonera .btn-nav.activo i,
 .botonera .btn-nav:hover i {
-  stroke: orange !important;
+  stroke: rgb(255, 251, 0) !important;
 }
 
 /* Mini reproductor */
 .mini-reproductor {
-  background: #d0d8e8; /* claro */
+  background: #d0d8e8; 
   color: #333;
   transition: background 0.3s ease, color 0.3s ease;
 }
 
 body.modo-oscuro .mini-reproductor {
-  background: rgba(30,30,30,0.9); /* oscuro */
+  background: rgba(30,30,30,0.9); 
   color: white;
-  box-shadow: 0 -2px 10px rgba(255,165,0,0.6);
+  box-shadow: 0 -2px 10px rgba(162, 0, 255, 0.6);
 }
 
 /* Barra progreso */
 .barra-progreso {
-  background: #0a3d91; /* azul claro */
+  background: #d30000;
 }
 
 body.modo-oscuro .barra-progreso {
-  background: #a020f0; /* violeta */
+  background: #a020f0; 
 }
 
 /* Botones mini reproductor */
 .mini-reproductor .controles button {
-  color: inherit; /* hereda color del modo */
+  color: inherit; 
   transition: color 0.3s ease;
 }
 
 .mini-reproductor .controles button:hover {
-  color: orange;
+  color: rgb(162, 0, 255);
 }
 
 /* Playlist activo / hover glow */
@@ -291,14 +311,14 @@ body.modo-claro .playlist-item:hover {
 body.modo-oscuro .playlist-item.activo,
 body.modo-oscuro .playlist-item:hover {
   box-shadow:
-    0 0 8px 2px orange,
-    0 0 20px 5px orange,
-    0 0 30px 10px orange;
+    0 0 8px 2px rgb(162, 0, 255),
+    0 0 20px 5px rgb(162, 0, 255),
+    0 0 30px 10px rgb(162, 0, 255);
 }
 
 /* Texto playlist seleccionado */
 .mini-reproductor .info ul li {
-  color: inherit; /* mantiene el color según modo */
+  color: inherit; 
     padding: 0.5rem 1rem;
   border-radius: 10px;
   cursor: pointer;
@@ -306,7 +326,7 @@ body.modo-oscuro .playlist-item:hover {
 }
 
 .mini-reproductor .info ul li[style*="font-weight: bold"] {
-  background: orange !important;
+  background: rgb(162, 0, 255) !important;
   color: white !important;
   opacity: 1 !important;
 }
@@ -360,14 +380,14 @@ body.modo-oscuro .playlist-item:hover {
 }
 
 .btn-reproducir:hover {
-  background: orange;
+  background: rgb(0, 60, 255);
 }
 
 .btn-reproducir:hover i {
   color: white;
 }
 
-/* Botonera inferior */
+
 /* Botonera inferior */
 .botonera {
   position: fixed;
@@ -419,12 +439,12 @@ body.modo-oscuro .botonera .btn-nav i {
 
 .botonera .btn-nav.activo,
 .botonera .btn-nav:hover {
-  color: orange;
+  color:violet;
 }
 
 .botonera .btn-nav.activo i,
 .botonera .btn-nav:hover i {
-  stroke: orange;
+  stroke: violet;
 }
 
 
@@ -452,7 +472,7 @@ body.modo-oscuro .botonera .btn-nav i {
 body.modo-oscuro .mini-reproductor {
   background: rgba(30,30,30,0.9);
   color: white;
-  box-shadow: 0 -2px 10px rgba(255,165,0,0.6);
+  box-shadow: 0 -2px 10px rgb(211, 134, 255);
 }
 
 .mini-reproductor .info {
@@ -497,7 +517,7 @@ body.modo-oscuro .mini-reproductor {
 
 .mini-reproductor .info ul li:hover {
   opacity: 0.9;
-  background: rgba(255,165,0,0.2);
+  background: rgba(255, 51, 0, 0.2);
 }
 
 .mini-reproductor .info ul li:nth-child(n+1) {
@@ -506,7 +526,7 @@ body.modo-oscuro .mini-reproductor {
 
 .mini-reproductor .info ul li[style*="font-weight: bold"] {
   opacity: 1;
-  background: orange;
+  background:rgb(162, 0, 255);
   color: white;
 }
 
@@ -535,20 +555,37 @@ body.modo-oscuro .mini-reproductor {
   color: orange;
 }
 
+
+
 /* Barra de progreso */
-.barra-progreso {
+/* Contenedor barra de progreso */
+.barra-progreso-container {
   position: absolute;
   bottom: 0;
   left: 0;
-  height: 4px;
-  background: #0a3d91;
+  width: 100%;
+  height: 6px; /* más fina */
+  background-color: #ccc;
+  cursor: pointer;
+  border-radius: 0 0 6px 6px;
+  overflow: hidden;
+}
+
+/* Progreso */
+.barra-progreso {
   width: 0%;
-  border-radius: 0 0 8px 8px;
-  transition: width 0.3s ease, background 0.3s ease;
+  height: 100%;
+  background-color: #007bff; /* azul por defecto */
+  transition: width 0.2s linear;
+}
+
+/* Modo oscuro */
+body.modo-oscuro .barra-progreso-container {
+  background-color: #444;
 }
 
 body.modo-oscuro .barra-progreso {
-  background: #a020f0;
+  background-color: #a020f0; /* violeta */
 }
 
 /* Menú canciones */
@@ -600,93 +637,820 @@ body.modo-oscuro .menu-canciones h2 {
 }
 
 .menu-canciones ul li:hover {
-  background: rgba(255,165,0,0.2);
+  background: rgba(132, 0, 255, 0.2);
 }
 
 .menu-canciones ul li.activa {
-  background: orange;
+  background: rgb(149, 0, 179);
   color: white;
   font-weight: 700;
 }
 
-/* Scrollbar (opcional) */
-.menu-canciones::-webkit-scrollbar {
-  width: 8px;
+
+.accesos-rapidos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 10px 0;
 }
 
-.menu-canciones::-webkit-scrollbar-track {
-  background: transparent;
+.accesos-rapidos button,
+#accesos-rapidos button {
+  padding: 10px 18px;
+  border-radius: 25px;
+  border: none;
+  background-color: #0ff;
+  color: #111;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 0 8px #0ff, 0 0 15px rgba(0, 255, 255, 0.8);
 }
 
-.menu-canciones::-webkit-scrollbar-thumb {
-  background: #a020f0;
-  border-radius: 4px;
+.accesos-rapidos button:hover,
+#accesos-rapidos button:hover {
+  background-color: #00e0e0;
+  box-shadow: 0 0 12px #0ff, 0 0 25px rgba(0, 255, 255, 1);
+  transform: scale(1.05);
 }
 
-body.modo-oscuro .menu-canciones::-webkit-scrollbar-thumb {
-  background: #ff99ff;
+/* Barra de búsqueda Google */
+#googleForm {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 10px;
 }
 
-
-.barra-busqueda {
-  width: 90%;
-  padding: 10px;
-  margin: 15px auto;
-  display: block;
-  border-radius: 8px;
-  border: 1px solid #ccc;
+#googleInput {
+  flex: 1;
+  padding: 10px 14px;
+  border-radius: 25px;
+  border: 2px solid rgb(0, 110, 255);
+  outline: none;
+  box-shadow: 0 0 8px #0ff, 0 0 15px rgba(0, 255, 255, 0.6);
   font-size: 1rem;
 }
-/* Estilo claro */
-#listaMP3 {
-  list-style: none;
-  padding: 0;
-  margin: 0 15px;
-  color: rgba(146, 5, 202, 0.308);
+
+#googleInput:focus {
+  border-color: #0047e0;
+  box-shadow: 0 0 12px #0ff, 0 0 25px rgba(0, 255, 255, 0.8);
 }
 
-#listaMP3 li button {
-  color: rgba(146, 5, 202, 0.5);
-}
-
-/* Estilo modo oscuro */
-body.modo-oscuro #listaMP3 {
-  color: rgba(146, 5, 202, 0.8);
-}
-
-body.modo-oscuro #listaMP3 li button {
-  color: rgba(180, 120, 255, 0.9);
-}
-/* Claro */
-label.boton-cargar {
-  color: rgba(146, 5, 202, 0.7);
+#googleForm button {
+  padding: 10px 18px;
+  border-radius: 25px;
+  border: none;
+  background-color: rgb(0, 140, 255);
+  color: #111;
+  font-weight: 700;
   cursor: pointer;
+  box-shadow: 0 0 8px rgb(0, 102, 255), 0 0 15px rgba(0, 102, 255, 0.8);
+  transition: all 0.3s ease;
+}
+
+#googleForm button:hover {
+  background-color: #00e0e0;
+  transform: scale(1.05);
 }
 
 /* Modo oscuro */
-body.modo-oscuro label.boton-cargar {
-  color: rgba(180, 120, 255, 0.9);
+body.modo-oscuro #googleInput {
+  background-color: #2c2c3e;
+  border-color: rgb(162, 0, 255);
+  color: #fff;
 }
 
-[data-modo="oscuro"] .barra-busqueda {
-  background-color: #222;
-  color: white;
-  border-color: #555;
+body.modo-oscuro #googleInput:focus {
+  border-color: rgba(162, 0, 255, 0.8);
+  box-shadow: 0 0 12px rgba(162, 0, 255, 0.8), 0 0 25px rgba(71,47,90,0.8);
 }
 
+body.modo-oscuro #googleForm button,
+body.modo-oscuro .accesos-rapidos button {
+  background-color: rgb(162, 0, 255);
+  color: #fff;
+}
+
+body.modo-oscuro #googleForm button:hover,
+body.modo-oscuro .accesos-rapidos button:hover {
+  box-shadow: 0 0 12px rgb(162, 0, 255), 0 0 25px rgba(71,47,90,0.8);
+}
+
+
+form[action*="youtube.com"] {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+form[action*="youtube.com"] input[type="text"] {
+  flex: 1;
+  padding: 10px 14px;
+  border-radius: 25px;
+  border: 2px solid rgb(0, 119, 255); 
+  outline: none;
+  box-shadow: 0 0 8px #0ff, 0 0 15px rgba(0, 255, 255, 0.6);
+  font-size: 1rem;
+}
+
+form[action*="youtube.com"] input[type="text"]:focus {
+  border-color: #00e0e0;
+  box-shadow: 0 0 12px #0ff, 0 0 25px rgba(0, 255, 255, 0.8);
+}
+
+form[action*="youtube.com"] button {
+  padding: 10px 18px;
+  border-radius: 25px;
+  border: none;
+  background-color: rgb(0, 140, 255);
+  color: #111;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 0 8px rgb(0, 102, 255), 0 0 15px rgba(0, 102, 255, 0.8);
+  transition: all 0.3s ease;
+}
+
+form[action*="youtube.com"] button:hover {
+  background-color: #00e0e0;
+  transform: scale(1.05);
+}
+
+/* Modo oscuro */
+body.modo-oscuro form[action*="youtube.com"] input[type="text"] {
+  background-color: #2c2c3e;
+  border-color: rgb(162, 0, 255);
+  color: #fff;
+}
+
+body.modo-oscuro form[action*="youtube.com"] input[type="text"]:focus {
+  border-color: rgba(162, 0, 255, 0.8);
+  box-shadow: 0 0 12px rgba(162, 0, 255, 0.8), 0 0 25px rgba(71,47,90,0.8);
+}
+
+body.modo-oscuro form[action*="youtube.com"] button {
+  background-color: rgb(162, 0, 255);
+  color: #fff;
+}
+
+body.modo-oscuro form[action*="youtube.com"] button:hover {
+  box-shadow: 0 0 12px rgb(162, 0, 255), 0 0 25px rgba(71,47,90,0.8);
+}
+
+
+
+
+
+/* === SECCIÓN DESCARGAS ESTILIZADA === */
+
+
+
+#descargas {
+  padding: 20px;
+  max-width: 900px;
+  margin: auto;
+  font-family: "Segoe UI", sans-serif;
+}
+
+/* Contenedor de controles */
+#descargas #cargaCanciones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+/* Botones generales - MODO CLARO */
+#descargas .boton-cargar,
+#descargas .btn-cargar {
+  background: #0ff;
+  color: #111;
+  padding: 12px 22px;
+  border-radius: 30px;
+  font-weight: 700;
+  font-size: 1rem;
+  border: none;
+  cursor: pointer;
+  text-transform: uppercase;
+  box-shadow: 0 0 8px #0ff, 0 0 15px rgba(0, 255, 255, 0.8);
+  transition: all 0.3s ease;
+}
+
+#descargas .boton-cargar:hover,
+#descargas .btn-cargar:hover {
+  background: #00e0e0;
+  box-shadow: 0 0 12px #0ff, 0 0 25px rgba(0, 255, 255, 1);
+  transform: scale(1.05);
+}
+
+/* Botones - MODO OSCURO */
+body.modo-oscuro #descargas .boton-cargar,
+body.modo-oscuro #descargas .btn-cargar {
+  background: rgb(162, 0, 255);
+  color: #fff;
+  box-shadow: 0 0 8px rgb(162, 0, 255), 0 0 15px rgba(68, 5, 110, 0.8);
+}
+
+body.modo-oscuro #descargas .boton-cargar:hover,
+body.modo-oscuro #descargas .btn-cargar:hover {
+  background: rgb(162, 0, 255);
+  box-shadow: 0 0 12px rgb(162, 0, 255), 0 0 25px rgb(71, 47, 90);
+}
+
+/* Barra de búsqueda */
+#descargas .barra-busqueda {
+  flex-grow: 1;
+  min-width: 200px;
+  padding: 12px 15px;
+  border-radius: 30px;
+  border: 2px solid #0ff;
+  font-size: 1rem;
+  background-color: rgba(255, 255, 255, 0.15);
+  color: #111;
+  box-shadow: 0 0 6px #0ff;
+  transition: all 0.3s ease;
+}
+
+#descargas .barra-busqueda:focus {
+  outline: none;
+  box-shadow: 0 0 12px #0ff, 0 0 20px rgba(0, 255, 255, 0.8);
+}
+
+/* MODO OSCURO - Barra de búsqueda */
+body.modo-oscuro #descargas .barra-busqueda {
+  border-color: rgb(162, 0, 255);
+  background-color: rgba(0, 0, 0, 0.3);
+  color: #fff;
+  box-shadow: 0 0 6px rgb(162, 0, 255);
+}
+
+body.modo-oscuro #descargas .barra-busqueda:focus {
+  box-shadow: 0 0 12px rgb(162, 0, 255), 0 0 20px rgb(162, 0, 255);
+}
+
+/* Barra de búsqueda - Modo claro */
+#descargas .barra-busqueda {
+  color: #111; 
+  caret-color: #0ff; 
+}
+
+/* Barra de búsqueda - Modo oscuro */
+body.modo-oscuro #descargas .barra-busqueda {
+  color: #fff; 
+  caret-color: rgb(162, 0, 255); 
+}
+
+
+/* Lista de MP3 */
+#descargas #listaMP3 {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  max-height: 350px;
+  overflow-y: auto;
+  border-radius: 15px;
+  background: rgba(0, 0, 0, 0.05);
+  box-shadow: inset 0 0 12px rgba(0, 255, 255, 0.5);
+  color: #111;
+}
+
+/* MODO OSCURO - Lista */
+body.modo-oscuro #descargas #listaMP3 {
+  background: rgba(255, 255, 255, 0.05);
+  color: #fff;
+  box-shadow: inset 0 0 12px rgba(204, 0, 255, 0.5);
+}
+
+/* Ítems de lista */
+#descargas #listaMP3 li {
+  padding: 14px 20px;
+  border-bottom: 1px solid rgba(0, 255, 255, 0.3);
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.25s ease;
+}
+
+#descargas #listaMP3 li:hover {
+  background: rgba(0, 255, 255, 0.15);
+  color: #0ff;
+  box-shadow: inset 0 0 8px rgba(0, 255, 255, 0.6);
+}
+
+/* MODO OSCURO - Ítems */
+body.modo-oscuro #descargas #listaMP3 li {
+  border-bottom: 1px solid rgba(183, 0, 255, 0.3);
+}
+
+body.modo-oscuro #descargas #listaMP3 li:hover {
+  background: rgba(225, 0, 255, 0.15);
+  color: rgb(162, 0, 255);
+  box-shadow: inset 0 0 8px rgb(162, 0, 255);
+}
+
+/* Estado activo/seleccionado */
+#descargas #listaMP3 li.activo {
+  background: rgba(0, 255, 255, 0.3);
+  font-weight: 700;
+}
+
+body.modo-oscuro #descargas #listaMP3 li.activo {
+  background: rgba(204, 0, 255, 0.3);
+}
+
+/* Scroll personalizado */
+#descargas #listaMP3::-webkit-scrollbar {
+  width: 8px;
+}
+
+#descargas #listaMP3::-webkit-scrollbar-thumb {
+  background: #0ff;
+  border-radius: 4px;
+}
+
+#descargas #listaMP3::-webkit-scrollbar-thumb:hover {
+  background: #00e0e0;
+}
+
+body.modo-oscuro #descargas #listaMP3::-webkit-scrollbar-thumb {
+  background: rgb(162, 0, 255)
+}
+
+body.modo-oscuro #descargas #listaMP3::-webkit-scrollbar-thumb:hover {
+  background: rgb(162, 0, 255);
+}
+
+/* ===== CONTENEDOR AGREGAR A PLAYLIST ===== */
+#descargas > div.contenedor-agregar-playlist {
+  margin-top: 1rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  justify-content: center;
+}
+
+#descargas > div.contenedor-agregar-playlist label {
+  font-weight: 700;
+  color: #111;
+  min-width: 140px;
+  user-select: none;
+}
+
+/* Select playlist */
+#descargas > div.contenedor-agregar-playlist select#selectPlaylists {
+  padding: 8px 12px;
+  border-radius: 30px;
+  border: 2px solid #0ff;
+  background-color: rgba(255 255 255 / 0.15);
+  color: #111;
+  font-weight: 600;
+  min-width: 200px;
+  cursor: pointer;
+  box-shadow: 0 0 6px #0ff;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+#descargas > div.contenedor-agregar-playlist select#selectPlaylists:hover,
+#descargas > div.contenedor-agregar-playlist select#selectPlaylists:focus {
+  border-color: #00e0e0;
+  outline: none;
+  box-shadow: 0 0 10px #00e0e0;
+}
+
+/* Botón agregar canciones */
+#descargas > div.contenedor-agregar-playlist button#btnAgregarSeleccionados {
+  padding: 10px 18px;
+  border-radius: 30px;
+  border: none;
+  background-color: #0ff;
+  color: #111;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 0 8px #0ff, 0 0 15px rgba(0, 255, 255, 0.8);
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
+  user-select: none;
+}
+
+#descargas > div.contenedor-agregar-playlist button#btnAgregarSeleccionados:hover {
+  background-color: #00e0e0;
+  box-shadow: 0 0 12px #0ff, 0 0 25px rgba(0, 255, 255, 1);
+}
+
+/* ===== CONTENEDOR GESTIÓN PLAYLISTS ===== */
+#playlistManager {
+  margin-top: 2rem;
+  max-width: 900px;
+  margin-left: auto;
+  margin-right: auto;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+  justify-content: center;
+  font-family: "Segoe UI", sans-serif;
+}
+
+#playlistManager input#inputNombrePlaylist {
+  flex-grow: 1;
+  min-width: 200px;
+  padding: 12px 16px;
+  border-radius: 30px;
+  border: 2px solid #0ff;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #111;
+  background-color: rgba(255 255 255 / 0.15);
+  box-shadow: 0 0 6px #0ff;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+#playlistManager input#inputNombrePlaylist:focus {
+  outline: none;
+  border-color: #00e0e0;
+  box-shadow: 0 0 12px #0ff, 0 0 20px rgba(0, 255, 255, 0.8);
+}
+
+#playlistManager button#btnCrearPlaylist {
+  padding: 12px 24px;
+  border-radius: 30px;
+  border: none;
+  background-color: #0ff;
+  color: #111;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 0 8px #0ff, 0 0 15px rgba(0, 255, 255, 0.8);
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
+  user-select: none;
+}
+
+#playlistManager button#btnCrearPlaylist:hover {
+  background-color: #00e0e0;
+  box-shadow: 0 0 12px #0ff, 0 0 25px rgba(0, 255, 255, 1);
+}
+
+/* Lista de playlists */
+#playlistManager #playlistsContainer {
+  width: 100%;
+  max-height: 350px;
+  overflow-y: auto;
+  background: rgba(0 0 0 / 0.05);
+  box-shadow: inset 0 0 12px rgba(0, 255, 255, 0.5);
+  border-radius: 15px;
+  padding: 10px 15px;
+  color: #111;
+  font-weight: 600;
+  user-select: none;
+}
+
+/* Ítems de playlists */
+#playlistManager .playlist-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 15px;
+  border-bottom: 1px solid rgba(0, 255, 255, 0.3);
+  cursor: pointer;
+  transition: background-color 0.25s ease;
+  border-radius: 8px;
+}
+
+#playlistManager .playlist-item:hover {
+  background-color: rgba(0, 255, 255, 0.15);
+  color: #0ff;
+  box-shadow: inset 0 0 8px rgba(0, 255, 255, 0.6);
+}
+
+/* Botón eliminar playlist */
+/* ==========================
+   Tachito eliminar playlist
+   ========================== */
+
+.btn-eliminar-playlist {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1.3rem;
+  padding: 6px;
+  border-radius: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.25s ease, text-shadow 0.25s ease, transform 0.12s ease, box-shadow 0.25s ease;
+  line-height: 1;
+}
+
+/* ----- MODO CLARO ----- */
+body.modo-claro .btn-eliminar-playlist {
+  color: #00cfff; 
+  text-shadow: 0 0 6px rgba(0, 207, 255, 0.6), 0 0 16px rgba(0, 207, 255, 0.2);
+}
+
+body.modo-claro .btn-eliminar-playlist:hover {
+  color: #fff;
+  background-color: rgba(0, 207, 255, 0.9);
+  transform: scale(1.12);
+  box-shadow: 0 0 10px rgba(0, 207, 255, 0.9), 0 0 24px rgba(0, 207, 255, 0.4);
+  text-shadow: 0 0 10px rgba(0, 207, 255, 1);
+}
+
+/* ----- MODO OSCURO ----- */
+body.modo-oscuro .btn-eliminar-playlist {
+  color: #b200ff; 
+  text-shadow: 0 0 6px rgba(178, 0, 255, 0.6), 0 0 16px rgba(178, 0, 255, 0.2);
+}
+
+body.modo-oscuro .btn-eliminar-playlist:hover {
+  color: #111;
+  background-color: rgba(178, 0, 255, 0.85);
+  transform: scale(1.12);
+  box-shadow: 0 0 12px rgba(178, 0, 255, 0.9), 0 0 28px rgba(178, 0, 255, 0.4);
+  text-shadow: 0 0 10px rgba(178, 0, 255, 1);
+}
+
+/* Ajuste para que quede alineado en playlist */
+.playlist-item .playlist-content .btn-eliminar-playlist {
+  margin-left: 8px;
+}
+
+
+/* ===== MODO OSCURO ===== */
+
+body.modo-oscuro #descargas > div.contenedor-agregar-playlist label,
+body.modo-oscuro #playlistManager {
+  color: #000000;
+}
+
+body.modo-oscuro #descargas > div.contenedor-agregar-playlist select#selectPlaylists,
+body.modo-oscuro #playlistManager input#inputNombrePlaylist {
+  background-color: rgba(255 255 255 / 0.1);
+  border-color: #cc00ff;
+  color: #960ecc;
+  box-shadow: 0 0 6px #9900ff;
+}
+
+body.modo-oscuro #descargas > div.contenedor-agregar-playlist select#selectPlaylists:hover,
+body.modo-oscuro #descargas > div.contenedor-agregar-playlist select#selectPlaylists:focus,
+body.modo-oscuro #playlistManager input#inputNombrePlaylist:focus {
+  border-color: rgba(162, 0, 255, 0.5);
+  box-shadow: 0 0 12px rgba(162, 0, 255, 0.5)0, 0 0 20px rgba(162, 0, 255, 0.5);
+}
+
+body.modo-oscuro #descargas > div.contenedor-agregar-playlist button#btnAgregarSeleccionados,
+body.modo-oscuro #playlistManager button#btnCrearPlaylist {
+  background-color: rgba(162, 0, 255, 0.5);
+  color: #fff;
+  box-shadow: 0 0 8px rgba(162, 0, 255, 0.5), 0 0 15px rgba(162, 0, 255, 0.5);
+}
+
+body.modo-oscuro #descargas > div.contenedor-agregar-playlist button#btnAgregarSeleccionados:hover,
+body.modo-oscuro #playlistManager button#btnCrearPlaylist:hover {
+  background-color: rgba(162, 0, 255, 0.5);
+  box-shadow: 0 0 12px rgba(162, 0, 255, 0.5), 0 0 25px rgba(162, 0, 255, 0.5);;
+}
+
+body.modo-oscuro #playlistManager #playlistsContainer {
+  background: rgba(255 255 255 / 0.05);
+  box-shadow: inset 0 0 12px rgba(162, 0, 255, 0.5);
+  color: #fff;
+}
+
+body.modo-oscuro #playlistManager .playlist-item {
+  border-bottom: 1px solid rgba(119, 0, 255, 0.3);
+}
+
+body.modo-oscuro #playlistManager .playlist-item:hover {
+  background: rgba(183, 0, 255, 0.15);
+  color: rgb(162, 0, 255);
+  box-shadow: inset 0 0 8px rgba(195, 0, 255, 0.6);
+}
+
+body.modo-oscuro #playlistManager .playlist-item button {
+  color: rgb(162, 0, 255);
+}
+
+body.modo-oscuro #playlistManager .playlist-item button:hover {
+  color: rgb(162, 0, 255);
+}
+
+/* Botón eliminar playlist */
+#playlistsContainer .playlist-item button {
+  background-color: transparent;
+  border: none;
+  color: #ff4d4d;
+  cursor: pointer;
+  font-size: 1.2rem;
+  padding: 4px 8px;
+  border-radius: 6px;
+  transition: background-color 0.3s ease, color 0.3s ease;
+  margin-left: 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#playlistsContainer .playlist-item button:hover {
+  background-color: #ff4d4d;
+  color: #fff;
+  box-shadow: 0 0 8px rgba(255, 77, 77, 0.7);
+}
+
+/* Modo oscuro */
+body.modo-oscuro #playlistsContainer .playlist-item button {
+  color: rgba(162, 0, 255, 0.5);
+}
+
+body.modo-oscuro #playlistsContainer .playlist-item button:hover {
+  background-color: rgba(162, 0, 255, 0.5);
+  color: #222;
+  box-shadow: 0 0 10px rgba(162, 0, 255, 0.5);
+}
+
+#playlistManager input[type="text"] {
+  background-color: #1e1e1e; /* Fondo oscuro */
+  color: #fff; /* Texto claro */
+  border: 1px solid #444; /* Borde sutil */
+  padding: 8px 10px;
+  border-radius: 5px;
+  width: 100%;
+  margin-bottom: 8px;
+  font-size: 14px;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+#playlistManager input[type="text"]:focus {
+  border-color: #cc00ff; /* Color de acento al enfocar */
+  box-shadow: 0 0 5px rgba(153, 0, 255, 0.5);
+  outline: none;
+}
+
+/* Botón de crear playlist */
+#playlistManager .btn-crear-playlist {
+  background-color: rgba(162, 0, 255, 0.5);
+  color: #1e1e1e;
+  border: none;
+  padding: 8px 12px;
+  font-size: 14px;
+  font-weight: bold;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.1s ease;
+}
+
+#playlistManager .btn-crear-playlist:hover {
+  background-color:rgba(162, 0, 255, 0.5);
+  transform: scale(1.03);
+}
+
+/* Variante de peligro (tacho) ajustada: fondo sólido, no transparente */
+.neon-btn--danger {
+  background: #ff3b3b; /* sólido */
+  color: #fff;
+  box-shadow: 0 0 14px #ff3b3b, inset 0 0 12px #ff6b6b;
+}
+
+/* aro de glow más visible */
+.neon-btn--danger::after {
+  box-shadow:
+    0 0 18px #ff3b3b,
+    0 0 32px rgba(255,58,167,.35),
+    0 0 48px rgba(255,59,59,.25);
+  opacity: 1;
+}
+
+/* hover */
+.neon-btn--danger:hover {
+  transform: translateY(-1px) scale(1.05);
+  box-shadow: 0 0 20px #ff3b3b, inset 0 0 14px #ff6b6b;
+}
+
+/* active */
+.neon-btn--danger:active {
+  transform: translateY(0) scale(0.98);
+  filter: brightness(1.08);
+}
+
+
+.neon-btn {
+  cursor: pointer; /* ya lo tenías, asegura la manito */
+}
+
+.neon-btn:hover {
+  cursor: pointer; /* refuerza que al pasar se vea la manito */
+}
+/* Contenedor de info de playlist (portada + nombre) */
+.playlist-info {
+  display: flex;
+  align-items: center;
+}
+
+/* Imagen de portada */
+.playlist-portada {
+  width: 50px;
+  height: 50px;
+  border-radius: 8px;
+  object-fit: cover;
+  box-shadow: 0 0 8px rgba(0, 255, 255, 0.5);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.playlist-portada:hover {
+  transform: scale(1.1);
+  box-shadow: 0 0 15px rgba(0, 255, 255, 0.8);
+}
+
+/* Modo oscuro */
+body.modo-oscuro .playlist-portada {
+  box-shadow: 0 0 8px rgba(255, 136, 0, 0.5);
+}
+
+body.modo-oscuro .playlist-portada:hover {
+  box-shadow: 0 0 15px rgba(255, 136, 0, 0.8);
+}
+
+/* Input de portada */
+#inputPortadaPlaylist {
+  padding: 12px 16px;
+  border-radius: 30px;
+  border: 2px solid #0ff;
+  background-color: rgba(255 255 255 / 0.15);
+  color: #111;
+  font-weight: 600;
+  min-width: 200px;
+  margin-bottom: 10px;
+  box-shadow: 0 0 6px #0ff;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+#inputPortadaPlaylist:focus {
+  outline: none;
+  border-color: #00e0e0;
+  box-shadow: 0 0 12px #0ff, 0 0 20px rgba(0, 255, 255, 0.8);
+}
+
+/* Modo oscuro */
+body.modo-oscuro #inputPortadaPlaylist {
+  border-color: #ff8800;
+  background-color: rgba(0, 0, 0, 0.3);
+  color: #fff;
+  box-shadow: 0 0 6px #ff8800;
+}
+
+body.modo-oscuro #inputPortadaPlaylist:focus {
+  border-color: #e67300;
+  box-shadow: 0 0 12px #ff8800, 0 0 20px rgba(255, 136, 0, 0.8);
+}
+
+/* Añadido para que las playlist-item con portada mantengan el estilo neón */
+#playlistsContainer .playlist-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 15px;
+  border-bottom: 1px solid rgba(0, 255, 255, 0.3);
+  cursor: pointer;
+  transition: background-color 0.25s ease, box-shadow 0.3s ease;
+  border-radius: 8px;
+}
+
+#playlistsContainer .playlist-item:hover {
+  background-color: rgba(0, 255, 255, 0.15);
+  color: #0ff;
+  box-shadow: inset 0 0 8px rgba(0, 255, 255, 0.6);
+}
+
+/* Modo oscuro */
+body.modo-oscuro #playlistsContainer .playlist-item {
+  border-bottom: 1px solid rgba(255, 136, 0, 0.3);
+}
+
+body.modo-oscuro #playlistsContainer .playlist-item:hover {
+  background-color: rgba(255, 136, 0, 0.15);
+  color: #ff8800;
+  box-shadow: inset 0 0 8px rgba(255, 136, 0, 0.6);
+}
+
+/* === CHATS === */
 /* Contenedor general del chat */
 .chat-container {
   display: flex;
-  height: 70vh; /* alto para que no ocupe toda la pantalla */
+  height: 55vh; /* alto para que no ocupe toda la pantalla */
   border: 1px solid #ccc;
   border-radius: 8px;
   overflow: hidden;
   background: var(--fondo-chat, #f9f9f9);
   box-shadow: 0 4px 8px rgb(0 0 0 / 0.1);
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-family: 'Segoe UI',sans-serif;
 }
 
+
 /* Lista de usuarios */
+
+body.modo-oscuro .chat-user {
+  color: #fff;
+}
+
 .chat-list {
   width: 220px;
   background-color: var(--fondo-usuarios, #ffffff);
@@ -732,6 +1496,10 @@ body.modo-oscuro label.boton-cargar {
   border-color: white;
 }
 
+.chat-messages {
+  overflow-y: auto;
+  scroll-behavior: smooth;
+}
 /* Ventana de chat */
 .chat-window {
   flex: 1;
@@ -804,6 +1572,10 @@ body.modo-oscuro label.boton-cargar {
   border-radius: 20px;
   outline: none;
   transition: border-color 0.3s ease;
+}
+
+#contenedor-chats {
+  padding-bottom: 80px; 
 }
 
 #chatInput:focus {
@@ -888,199 +1660,308 @@ body.modo-oscuro #sendMsgBtn:hover {
 }
 
 /* Responsive básico */
-@media (max-width: 480px) {
+
+/* Tablets (768px - 1024px) */
+@media screen and (max-width: 1024px) {
+  .playlists {
+    grid-template-columns: repeat(3, 140px);
+    grid-template-rows: repeat(2, 140px);
+    gap: 2rem;
+    padding: 1.5rem;
+  }
+  .playlist-item {
+    width: 140px;
+    height: 140px;
+    padding: 0.8rem;
+  }
+  .playlist-content h3 { font-size: 1rem; }
+  .btn-reproducir { width: 28px; height: 28px; }
+  .botonera .btn-nav { font-size: 0.7rem; }
+}
+
+@media screen and (max-width: 1024px) {
+  .mini-reproductor {
+    height: 64px;
+    padding: 0 0.8rem;
+    font-size: 0.85rem;
+    gap: 0.8rem;
+  }
+  .mini-reproductor .controles button {
+    font-size: 1.1rem;
+    padding: 0.2rem;
+  }
+  .barra-progreso-container {
+    height: 5px;
+  }
+  .menu-canciones {
+    max-width: 350px;
+    max-height: 55vh;
+    padding: 0.8rem;
+  }
+}
+
+
+
+
+@media screen and (max-width: 1024px) {
+  #descargas, #playlistManager {
+    max-width: 700px;
+    padding: 15px;
+  }
+
+  #descargas #cargaCanciones,
+  #descargas > div.contenedor-agregar-playlist,
+  #playlistManager {
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: center;
+  }
+
+  #descargas .boton-cargar,
+  #descargas .btn-cargar,
+  #playlistManager button#btnCrearPlaylist,
+  #descargas > div.contenedor-agregar-playlist button#btnAgregarSeleccionados {
+    padding: 10px 18px;
+    font-size: 0.9rem;
+  }
+
+  #descargas .barra-busqueda,
+  #playlistManager input#inputNombrePlaylist,
+  #descargas > div.contenedor-agregar-playlist select#selectPlaylists {
+    min-width: 160px;
+    font-size: 0.9rem;
+    padding: 10px 14px;
+  }
+
+  #descargas #listaMP3,
+  #playlistManager #playlistsContainer {
+    max-height: 300px;
+  }
+}
+
+@media screen and (max-width: 1024px) {
+  .chat-container {
+    flex-direction: column;
+    height: 50vh;
+  }
+
+  .chat-list {
+    width: 100%;
+    display: flex;
+    overflow-x: auto;
+    border-right: none;
+    border-bottom: 1px solid #ddd;
+  }
+
+  .chat-user {
+    flex-direction: column;
+    align-items: center;
+    padding: 6px;
+    margin-right: 8px;
+    margin-bottom: 0;
+  }
+
+  .chat-user img {
+    width: 32px;
+    height: 32px;
+    margin-right: 0;
+    margin-bottom: 4px;
+  }
+
+  .chat-messages {
+    flex: 1;
+    padding: 12px;
+  }
+
+  #chatInput {
+    font-size: 0.95rem;
+  }
+
+  #sendMsgBtn {
+    padding: 0 12px;
+    font-size: 1.1rem;
+  }
+}
+
+/* celus (menos de 768px) */
+@media screen and (max-width: 767px) {
+  header { padding: 0.8rem 1rem; flex-direction: column; gap: 0.5rem; }
+  .playlists {
+    grid-template-columns: repeat(2, 120px);
+    grid-template-rows: repeat(2, 120px);
+    gap: 1.5rem;
+    padding: 1rem;
+  }
   .playlist-item {
     width: 120px;
     height: 120px;
+    padding: 0.5rem;
   }
-  #logo {
-    width: 110px;
-    height: 40px;
-    font-size: 1.2rem;
-  }
-  .botonera .btn-nav span {
-    font-size: 0.6rem;
-  }
+  .playlist-content h3 { font-size: 0.95rem; }
+  .btn-reproducir { width: 24px; height: 24px; }
+  .botonera .btn-nav { font-size: 0.65rem; }
+  main.contenido { padding: 1rem 1rem 5rem; }
+}
+
+@media screen and (max-width: 767px) {
   .mini-reproductor {
-    height: 60px;
+    height: 56px;
+    padding: 0 0.6rem;
+    font-size: 0.8rem;
+    gap: 0.5rem;
+  }
+  .mini-reproductor .info strong {
     font-size: 0.8rem;
   }
-}
-
-@media screen and (max-width: 600px) {
-  header {
-    flex-direction: column;
-    align-items: center;
-    gap: 10px;
+  .mini-reproductor .info ul {
+    font-size: 0.7rem;
+    gap: 6px;
   }
-
-  .contenedor {
-    margin: 10px;
-    padding: 10px;
+  .mini-reproductor .controles button {
+    font-size: 1rem;
+    padding: 0.15rem;
   }
-
-  .botonera {
-    flex-direction: row;
-    flex-wrap: wrap;
-    justify-content: space-around;
-    padding: 8px;
-    height: auto;
-    position: fixed;
-    bottom: 0;
-    width: 100%;
-    z-index: 100;
+  .barra-progreso-container {
+    height: 4px;
   }
-
-  .boton {
-    width: 20%;
-    min-width: 60px;
-    margin: 5px 0;
-    flex: 1 0 20%;
-    font-size: 0.8em;
-  }
-
-  .icono-boton {
-    font-size: 1.2em;
-  }
-
-  .texto-boton {
-    font-size: 0.7em;
-  }
-
-  #menuConfig {
-    top: 60px;
-    right: 10px;
-    width: 150px;
-    font-size: 0.8em;
-  }
-
-  #listaMP3 li {
-    font-size: 0.9em;
-  }
-
-  .playlist {
-    padding: 6px;
-    margin: 4px 0;
-    font-size: 0.9em;
-  }
-
-  #buscador {
-    font-size: 1em;
-    padding: 6px;
-  }
-}
-
-@media (max-width: 768px) {
-  #chatContainer {
-    flex-direction: column;
-    height: 100vh;
-  }
-
-  #userList {
-    width: 100%;
-    height: auto;
-    border-right: none;
-    border-bottom: 1px solid #ccc;
-    overflow-x: auto;
-    display: flex;
-    flex-direction: row;
-    gap: 10px;
-    padding: 10px;
-  }
-
-  .userItem {
-    flex: 1;
-    white-space: nowrap;
-    text-align: center;
-  }
-
-  #chatBox {
-    width: 100%;
-    height: 100%;
-    padding: 10px;
-  }
-
-  #messages {
-    max-height: 55vh;
-    overflow-y: auto;
-    padding: 10px;
-    font-size: 14px;
-  }
-
-  #inputContainer {
-    flex-direction: column;
-    padding: 10px;
-    gap: 10px;
-  }
-
-  #inputMensaje {
-    width: 100%;
-    font-size: 16px;
-    padding: 10px;
-  }
-
-  #btnEnviar {
-    width: 100%;
-    font-size: 16px;
-    padding: 10px;
-  }
-
-}
-
-@media screen and (orientation: portrait) {
-  #chatContainer {
-    flex-direction: column;
-    height: 100dvh;
-  }
-
-  #userList {
-    width: 100%;
-    flex-direction: row;
-    flex-wrap: nowrap;
-    overflow-x: auto;
-    overflow-y: hidden;
-    border-bottom: 1px solid #aaa;
-    border-right: none;
-    height: auto;
-    padding: 10px;
-    gap: 10px;
-  }
-
-  .userItem {
-    min-width: 100px;
-    text-align: center;
-    flex-shrink: 0;
-  }
-
-  #chatBox {
-    width: 100%;
-    height: auto;
-    flex: 1;
-    padding: 10px;
-    display: flex;
-    flex-direction: column;
-  }
-
-  #messages {
-    flex: 1;
-    overflow-y: auto;
+  .menu-canciones {
+    width: 95vw;
+    max-width: 320px;
     max-height: 50vh;
-    font-size: 14px;
+    padding: 0.6rem;
+  }
+}
+
+@media screen and (max-width: 1024px) {
+  #playlistsContainer .playlist-item,
+  .playlist-info {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .playlist-portada {
+    width: 45px;
+    height: 45px;
+  }
+
+  .btn-eliminar-playlist,
+  #playlistManager .btn-crear-playlist {
+    font-size: 1.1rem;
+    padding: 5px 10px;
+  }
+
+  #inputPortadaPlaylist {
+    min-width: 180px;
+    padding: 10px 14px;
+    font-size: 0.9rem;
+  }
+}
+
+/* Móviles (menos de 768px) */
+@media screen and (max-width: 767px) {
+  #descargas, #playlistManager {
+    max-width: 95%;
     padding: 10px;
   }
 
-  #inputContainer {
-    display: flex;
+  #descargas #cargaCanciones,
+  #descargas > div.contenedor-agregar-playlist,
+  #playlistManager {
     flex-direction: column;
     gap: 8px;
-    padding: 10px;
   }
 
-  #inputMensaje,
-  #btnEnviar {
+  #descargas .boton-cargar,
+  #descargas .btn-cargar,
+  #playlistManager button#btnCrearPlaylist,
+  #descargas > div.contenedor-agregar-playlist button#btnAgregarSeleccionados {
+    padding: 8px 16px;
+    font-size: 0.85rem;
     width: 100%;
-    font-size: 16px;
-    padding: 10px;
+  }
+
+  #descargas .barra-busqueda,
+  #playlistManager input#inputNombrePlaylist,
+  #descargas > div.contenedor-agregar-playlist select#selectPlaylists {
+    min-width: 100%;
+    font-size: 0.85rem;
+    padding: 8px 12px;
+  }
+
+  #descargas #listaMP3,
+  #playlistManager #playlistsContainer {
+    max-height: 250px;
   }
 }
 
+@media screen and (max-width: 767px) {
+  #playlistsContainer .playlist-item,
+  .playlist-info {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+  }
+
+  .playlist-portada {
+    width: 40px;
+    height: 40px;
+  }
+
+  .btn-eliminar-playlist,
+  #playlistManager .btn-crear-playlist {
+    font-size: 1rem;
+    padding: 4px 8px;
+  }
+
+  #inputPortadaPlaylist {
+    min-width: 100%;
+    padding: 8px 12px;
+    font-size: 0.85rem;
+  }
+}
+
+@media screen and (max-width: 767px) {
+  .chat-container {
+    flex-direction: column;
+    height: 60vh;
+  }
+
+  .chat-list {
+    width: 100%;
+    display: flex;
+    overflow-x: auto;
+    border-right: none;
+    border-bottom: 1px solid #ddd;
+  }
+
+  .chat-user {
+    flex-direction: column;
+    align-items: center;
+    padding: 4px;
+    margin-right: 6px;
+    margin-bottom: 0;
+    font-size: 0.85rem;
+  }
+
+  .chat-user img {
+    width: 28px;
+    height: 28px;
+    margin-right: 0;
+    margin-bottom: 2px;
+  }
+
+  .chat-messages {
+    flex: 1;
+    padding: 10px;
+  }
+
+  #chatInput {
+    font-size: 0.9rem;
+    padding: 8px 12px;
+  }
+
+  #sendMsgBtn {
+    padding: 0 10px;
+    font-size: 1rem;
+  }
+}
