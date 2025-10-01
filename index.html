@@ -6,7 +6,7 @@
   <title>MiuNave</title>
   <link rel="stylesheet" href="miunave.css" />
   <script src="https://unpkg.com/lucide@latest"></script>
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet" />
+ <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet" />
 </head>
 <body class="modo-claro">
   <header>
@@ -26,24 +26,90 @@
     </section>
 
     <section id="buscar" class="seccion-oculta">
-      <h2>Buscar</h2>
-      <p>Acá va la sección Buscar (vacía por ahora).</p>
+
+      <section id="busquedas">
+  <h2>🔍 Buscador de google</h2>
+
+
+  <form id="googleForm" action="https://www.google.com/search" method="GET" target="_blank">
+    <input type="text" name="q" id="googleInput" placeholder="Buscar en Google..." required>
+    <button type="submit">Buscar</button>
+  </form>
+
+<h2>🔍 Buscador de YouTube</h2>
+<form action="https://www.youtube.com/results" method="get" target="_blank">
+  <input type="text" name="search_query" placeholder="Buscar en YouTube..." required>
+  <button type="submit">🔴 Buscar</button>
+</form>
+
+
+  <hr>
+
+  <div class="accesos-rapidos">
+  
+    <button onclick="window.open('https://ytmp3.as/t8fZ', '_blank')">🎧 Convertir YouTube a MP3</button>
+    <button onclick="window.open('https://www.snaptubeapp.com/es/', '_blank')">📲 Descargar SnapTube Android</button>
+  </div>
+</section>
+
     </section>
 
-    <section id="descargas" class="seccion-oculta">
-      <h2>Descargas</h2>
-      <input
-        type="text"
-        id="busquedaMP3"
-        placeholder="Buscar MP3..."
-        class="barra-busqueda"
-      />
-      <ul id="listaMP3"></ul>
-      <div id="cargaCanciones">
-        <label for="inputMP3" class="boton-cargar">🎵 Cargar MP3</label>
-        <input type="file" id="inputMP3" accept="audio/mpeg" multiple hidden />
-      </div>
-    </section>
+<section id="descargas" class="seccion-oculta">
+  <h2>Descargas</h2>
+
+  <div id="cargaCanciones" class="contenedor-carga">
+    <label for="inputMP3" class="boton-cargar">🎵 Cargar canciónes MP3</label>
+<input type="file" id="inputMP3" accept="audio/mpeg" hidden />
+
+    <button id="btnCargarCarpeta" class="btn-cargar">📂 Cargar playlists</button>
+
+    <input type="file" id="inputFolder" webkitdirectory multiple hidden />
+
+    <input
+      type="text"
+      id="busquedaMP3"
+      placeholder="Buscar MP3..."
+      class="barra-busqueda"
+    />
+  </div>
+<!-- FAB: Vaciar MP3 -->
+<button id="eliminarTodoMP3"
+        class="neon-btn neon-btn--danger neon-fab"
+        aria-label="Eliminar todos los MP3"
+        title="Eliminar todos los MP3">
+  
+  <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true">
+    <path d="M9 3h6l1 2h4v2H4V5h4l1-2zm1 6h2v9h-2V9zm4 0h2v9h-2V9zM7 9h2v9H7V9z" />
+  </svg>
+  <span class="sr-only">Vaciar MP3</span>
+</button>
+  <ul id="listaMP3"></ul>
+
+  <div class="contenedor-agregar-playlist">
+    <label for="selectPlaylists" class="label-playlist">
+    
+      </label>
+    <select id="selectPlaylists" class="select-playlists">
+      <option value="">-- Seleccioná playlist --</option>
+      <!-- Se llenará dinámicamente desde JS -->
+    </select>
+    <button id="btnAgregarSeleccionados" class="btn-agregar">
+      Agregar canciones seleccionadas
+    </button>
+  </div>
+
+  
+
+  <div id="playlistManager" class="playlist-manager">
+ <input type="text" id="inputNombrePlaylist" placeholder="Nombre playlist">
+
+<button id="btnCrearPlaylist">Crear Playlist</button>
+
+    <div id="playlistsContainer"></div>
+    <h2 style="display: flex; align-items: center; gap: 5px;">
+      
+
+</section>
 
     <section id="chats" class="seccion-oculta">
       <h2>Chats</h2>
@@ -73,26 +139,48 @@
 
     <section id="ecualizador" class="seccion-oculta">
       <h2>Ecualizador</h2>
-      <p>Acá va la sección Ecualizador (vacía por ahora).</p>
+
     </section>
   </main>
 
-  <div id="miniReproductor" class="mini-reproductor" style="display:none;">
-    <div class="info">
-      <strong id="nombrePlaylist"></strong>
-      <ul id="listaCanciones"></ul>
-    </div>
-    <div class="controles">
-      <button id="btnShuffle" title="Aleatorio"><i class="fa-solid fa-shuffle"></i></button>
-      <button id="btnPrev" title="Anterior"><i class="fa-solid fa-backward-step"></i></button>
-      <button id="btnPlayPause" title="Play/Pausa"><i class="fa-solid fa-play"></i></button>
-      <button id="btnNext" title="Siguiente"><i class="fa-solid fa-forward-step"></i></button>
-      <button id="btnLoop" title="Repetir"><i class="fa-solid fa-repeat"></i></button>
-      <button id="btnDownload" title="Descargar canción"><i class="fa-solid fa-download"></i></button>
-      <button id="btnMenuCanciones" title="Mostrar lista de canciones"><i class="fa-solid fa-list"></i></button>
-    </div>
-    <div id="barraProgreso" class="barra-progreso" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"></div>
+<div id="miniReproductor" class="mini-reproductor" style="display:none;">
+  <div class="info">
+    <strong id="nombrePlaylist"></strong>
+    <ul id="listaCanciones"></ul>
   </div>
+<div class="controles">
+  <button class="control-btn" id="btnShuffle" title="Aleatorio">
+    <i class="fa-solid fa-shuffle"></i>
+  </button>
+
+  <button class="control-btn" id="btnPrev" title="Anterior">
+    <i class="fa-solid fa-backward-step"></i>
+  </button>
+
+  <button class="control-btn" id="btnPlayPause" title="Play/Pausa">
+    <i class="fa-solid fa-play"></i>
+  </button>
+
+  <button class="control-btn" id="btnNext" title="Siguiente">
+    <i class="fa-solid fa-forward-step"></i>
+  </button>
+
+  <button class="control-btn" id="btnLoop" title="Repetir">
+    <i class="fa-solid fa-repeat"></i>
+  </button>
+
+  <button class="control-btn" id="btnDownload" title="Descargar canción">
+    <i class="fa-solid fa-download"></i>
+  </button>
+
+  <button class="control-btn" id="btnMenuCanciones" title="Mostrar lista de canciones">
+    <i class="fa-solid fa-list"></i>
+  </button>
+</div>
+<div id="barraProgresoContainer" class="barra-progreso-container">
+  <div id="barraProgreso" class="barra-progreso"
+       role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"></div>
+</div>
 
   <div id="menuCanciones" class="menu-canciones seccion-oculta" style="display:none;">
     <button id="btnCerrarMenu" class="btn-cerrar-menu" title="Cerrar menú canciones">&times;</button>
@@ -133,3 +221,4 @@
   </script>
 </body>
 </html>
+
