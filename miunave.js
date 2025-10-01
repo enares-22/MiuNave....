@@ -25,624 +25,861 @@ const btnMenuCanciones = document.getElementById("btnMenuCanciones");
 const audio = document.getElementById("audio");
 
 // Estado
-let playlistActualIndex = 0;
-let cancionActualIndex = 0;
 let reproduciendo = false;
 let modoAleatorio = false;
 let modoLoop = false;
 
-// --- IndexedDB para guardar MP3 ---
-const DB_NAME = "miunaveDB";
-const DB_STORE = "mp3files";
-let db;
-
-function abrirDB() {
-  return new Promise((resolve, reject) => {
-    const request = indexedDB.open(DB_NAME, 1);
-    request.onerror = () => reject("Error abriendo DB");
-    request.onsuccess = () => {
-      db = request.result;
-      resolve(db);
-    };
-    request.onupgradeneeded = e => {
-      db = e.target.result;
-      if (!db.objectStoreNames.contains(DB_STORE)) {
-        db.createObjectStore(DB_STORE, { keyPath: "name" });
-      }
-    };
-  });
-}
-
-// Guardar archivo
-function guardarArchivoMP3(file) {
-  return new Promise((resolve, reject) => {
-    const tx = db.transaction(DB_STORE, "readwrite");
-    const store = tx.objectStore(DB_STORE);
-    const item = {
-      name: file.name,
-      file: file
-    };
-    const req = store.put(item);
-    req.onsuccess = () => resolve();
-    req.onerror = () => reject("Error guardando archivo");
-  });
-}
-
-// Obtener todos los archivos guardados
-function obtenerTodosArchivos() {
-  return new Promise((resolve, reject) => {
-    const tx = db.transaction(DB_STORE, "readonly");
-    const store = tx.objectStore(DB_STORE);
-    const request = store.getAll();
-    request.onsuccess = () => resolve(request.result);
-    request.onerror = () => reject("Error obteniendo archivos");
-  });
-}
-
-// Eliminar archivo por nombre
-function eliminarArchivo(nombre) {
-  return new Promise((resolve, reject) => {
-    const tx = db.transaction(DB_STORE, "readwrite");
-    const store = tx.objectStore(DB_STORE);
-    const request = store.delete(nombre);
-    request.onsuccess = () => resolve();
-    request.onerror = () => reject("Error eliminando archivo");
-  });
-}
-
-// Variables para MP3 locales
-let archivosMP3 = []; // Array con objetos {name, file}
-
-// Mostrar lista filtrada con búsqueda
-function mostrarMP3s(filtro = "") {
-  const lista = document.getElementById("listaMP3");
-  lista.innerHTML = "";
-
-  const filtrados = archivosMP3.filter(a =>
-    a.name.toLowerCase().includes(filtro.toLowerCase())
-  );
-
-  if (filtrados.length === 0) {
-    lista.innerHTML = "<li>No hay archivos que coincidan</li>";
-    return;
-  }
-
-  filtrados.forEach(({ name }) => {
-    const li = document.createElement("li");
-    li.textContent = name;
-    li.style.cursor = "pointer";
-
-    // Click para reproducir archivo local
-    li.addEventListener("click", () => {
-      reproducirArchivoLocal(name);
-    });
-
-    // Botón para eliminar
-    const btnEliminar = document.createElement("button");
-    btnEliminar.textContent = "🗑️";
-    btnEliminar.style.marginLeft = "10px";
-    btnEliminar.title = "Eliminar archivo";
-    btnEliminar.addEventListener("click", async (e) => {
-      e.stopPropagation();
-      await eliminarArchivo(name);
-      await cargarArchivosDB();
-      mostrarMP3s(filtro);
-      alert(`Archivo "${name}" eliminado`);
-    });
-
-    li.appendChild(btnEliminar);
-    lista.appendChild(li);
-  });
-}
-
-// Reproducir archivo local guardado
-function reproducirArchivoLocal(nombre) {
-  const archivo = archivosMP3.find(a => a.name === nombre);
-  if (!archivo) {
-    alert("Archivo no encontrado");
-    return;
-  }
-  const url = URL.createObjectURL(archivo.file);
-  audio.src = url;
-  audio.play();
-  reproduciendo = true;
-  playlistActualIndex = -1; // Para diferenciar que es MP3 local
-  cancionActualIndex = -1;
-
-  // Mostrar info en mini reproductor
-  nombrePlaylistElem.textContent = `MP3 local — ${nombre}`;
-  listaCancionesElem.innerHTML = `<li style="font-weight:bold; color:${
-    body.classList.contains("modo-oscuro") ? "#a020f0" : "#0a3d91"
-  }">${nombre}</li>`;
-  miniReproductor.style.display = "flex";
-  actualizarBotonPlayPause();
-}
-
-// Cargar archivos de IndexedDB a variable global
-async function cargarArchivosDB() {
-  archivosMP3 = await obtenerTodosArchivos();
-}
-
-// Input para cargar archivos
-const inputMP3 = document.getElementById("inputMP3");
-inputMP3.addEventListener("change", async (e) => {
-  const files = Array.from(e.target.files);
-  for (const file of files) {
-    if (file.type === "audio/mpeg" || file.type === "audio/mp3") {
-      await guardarArchivoMP3(file);
-    }
-  }
-  await cargarArchivosDB();
-  mostrarMP3s();
-  e.target.value = ""; // resetear input
-  alert("Archivos guardados");
-});
-
-// Playlists fijas
-
+// --- Playlists fijas ---
 const playlists = [
   {
     titulo: "Rock Clásico",
-    imagen: "https://i.imgur.com/zrZDPXW.jpg",
+    imagen: "https://s0.smartresize.com/wallpaper/963/312/HD-wallpaper-music-heavy-metal-1980s-cover-art-rock-music-rock-and-roll-thumbnail.jpg",
     colorDegradado: "rgba(255, 0, 0, 0.6)",
     canciones: [
-      { nombre: "Bohemian Rhapsody", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" },
-      { nombre: "Hotel California", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3" },
-      { nombre: "Stairway to Heaven", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3" }
+      { nombre: "AC/DC - Back In Black", url: "rock clasicos/ACDC - Back In Black (Official Video).mp3" },
+      { nombre: "AC/DC - Highway To Hell", url: "rock clasicos/ACDC - Highway to Hell (Official Video).mp3" },
+      { nombre: "AC/DC - Thunderstruck", url: "rock clasicos/ACDC - Thunderstruck (Official Video).mp3" },
+      { nombre: "Evanescence - Bring Me To Life", url: "rock clasicos/Evanescence - Bring Me To Life (Official HD Music Video).mp3" },
+      { nombre: "Guns N Roses - Welcome To The Jungle", url: "rock clasicos/Guns N' Roses - Welcome To The Jungle.mp3" },
+      { nombre: "Kiss - I Was Made For Lovin You Baby", url: "rock clasicos/Kiss - I Was Made For Lovin' You.mp3" },
+      { nombre: "Queen - Somebody To Love", url: "rock clasicos/Queen - Somebody To Love (Official Video).mp3" },
+      { nombre: "Red Hot Chili Peppers - Californication", url: "rock clasicos/Red Hot Chili Peppers - Californication (Official Music Video) [HD UPGRADE].mp3" },
+      { nombre: "Survivor - Eye Of The Tiger", url: "rock clasicos/Survivor - Eye Of The Tiger (Official HD Video).mp3" },
+      { nombre: "Guns N Roses - Sweet Child O Mine", url: "rock clasicos/Sweet Child O' Mine.mp3" },
+      { nombre: "The Rolling Stones - Paint It, Black", url: "rock clasicos/The Rolling Stones - Paint It, Black (Official Lyric Video).mp3" },
+      { nombre: "The Beatles - Dont Let Me Down", url: "rock clasicos/The Beatles - Don't Let Me Down.mp3" }
     ]
   },
   {
     titulo: "Pop Hits",
-    imagen: "https://i.imgur.com/ogvZbUI.jpg",
+    imagen: "https://previews.123rf.com/images/studioaccendo/studioaccendo2304/studioaccendo230406225/202236994-pop-art-comic-book-explosion-background-pop-art-comics-book-magazine-cover.jpg.jpg",
     colorDegradado: "rgba(0, 123, 255, 0.6)",
     canciones: [
-      { nombre: "Shape of You", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3" },
-      { nombre: "Blinding Lights", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-5.mp3" },
-      { nombre: "Uptown Funk", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-6.mp3" }
+      { nombre: "Michael Jackson - Billie Jean", url: "pop hitss/Billie Jean - Michael Jackson.mp3" },
+      { nombre: "The Weeknd - Blinding Lights", url: "pop hitss/The Weeknd - Blinding Lights (Lyrics) - 7clouds.mp3" },
+      { nombre: "Mark Ronson ft. Bruno Mars - Uptown Funk", url: "pop hitss/Mark Ronson - Uptown Funk (Lyrics) ft. Bruno Mars - 7clouds.mp3" },
+      { nombre: "Michael Jackson - Thriller", url: "pop hitss/Michael Jackson - Thriller (Lyrics) - The Greatest Songs.mp3" },
+      { nombre: "a-ha - Take On Me", url: "pop hitss/a-ha - Take On Me (Official Video) [4K] - a-ha.mp3" },
+      { nombre: "Lady Gaga, Bruno Mars - Die With A Smile", url: "pop hitss/Lady Gaga, Bruno Mars - Die With A Smile (Official Music Video) - LadyGagaVEVO.mp3" },
+      { nombre: "Harry Styles - As It Was", url: "pop hitss/Harry Styles - As It Was (Lyrics) - Fans Music.mp3" },
+      { nombre: "Billie Eilish - BIRDS OF A FEATHER", url: "pop hitss/Billie Eilish - BIRDS OF A FEATHER (Official Music Video) - BillieEilishVEVO.mp3" },
+      { nombre: "Katy Perry - Firework", url: "pop hitss/Katy Perry - Firework (Lyrics) - TikTokHymn.mp3" },
+      { nombre: "Rihanna - Umbrella", url: "pop hitss/Umbrella - Rihanna (Lyrics)  - Pillow.mp3" },
+      { nombre: "Beyoncé - Crazy In Love ft. JAY Z", url: "pop hitss/Beyoncé - Crazy In Love ft. JAY Z - BeyoncéVEVO.mp3" },
+      { nombre: "Spice Girls - Wannabe", url: "pop hitss/Spice Girls - Wannabe [Lyrics] - GlyphoricVibes.mp3" }
     ]
   },
   {
-    titulo: "Indie Chill",
-    imagen: "https://i.imgur.com/LdC6xLw.jpg",
+    titulo: "Rock Nacional ",
+    imagen: "https://cdn-images.dzcdn.net/images/talk/8000396a999b5073426a77512589d31d/500x500.jpg",
     colorDegradado: "rgba(40, 167, 69, 0.6)",
     canciones: [
-      { nombre: "Sunset Lover", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-7.mp3" },
-      { nombre: "Electric Feel", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-8.mp3" },
-      { nombre: "Somebody Else", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-9.mp3" }
+      { nombre: "Soda Stereo - Prófugos (Gira Me Verás Volver)", url: "rock nacional/Soda Stereo - Prófugos (Gira Me Verás Volver).mp3" },
+      { nombre: "Soda Stereo - De Musica Ligera", url: "rock nacional/Soda Stereo - De Música Ligera (Official Video).mp3" },
+      { nombre: "Intoxicados - Nunca Quise", url: "rock nacional/Intoxicados - Nunca quise (video oficial) [HD].mp3" },
+      { nombre: "Rata Blanca - Mujer Amante", url: "rock nacional/Rata Blanca - Mujer Amante.mp3" },
+      { nombre: "SPINETTA - BAJAN", url: "rock nacional/SPINETTA - BAJAN.mp3" },
+      { nombre: "Gustavo Cerati - Adiós", url: "rock nacional/Gustavo Cerati Adiós (Official Video).mp3" },
+      { nombre: "Andrés Calamaro - Flaca", url: "rock nacional/Andrés Calamaro - Flaca (Videoclip Oficial).mp3" },
+      { nombre: "No Te Va Gustar - A Las Nueve", url: "rock nacional/A las Nueve.mp3" },
+      { nombre: "La Renga - El Revelde", url: "rock nacional/El Revelde.mp3" },
+      { nombre: "Indio Solari - Un Poco De Amor Francés (Indio en Concierto Estadio Unico De La Plata)", url: "rock nacional/Un poco de amor francés - Estadio Único de La Plata - Indio en Concierto [2008] Full HD.mp3" },
+      { nombre: "Ciro y Los Persas - ASTROS", url: "rock nacional/Ciro y Los Persas  ASTROS  (Registro Oficial de la Grabación).mp3" }
     ]
   },
   {
-    titulo: "Trap Argento",
-    imagen: "https://i.imgur.com/1W9T1YF.jpg",
+    titulo: "Trap Argentino",
+    imagen: "https://i.pinimg.com/736x/82/86/b2/8286b254915c576c20b49b6bbc265ad9.jpg",
     colorDegradado: "rgba(111, 66, 193, 0.6)",
     canciones: [
-      { nombre: "Entre Nosotros", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-10.mp3" },
-      { nombre: "She Don't Give a FO", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-11.mp3" },
-      { nombre: "Dance Crip", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-12.mp3" }
+      { nombre: "YSY A x BHAVI ft. MILO J - FLECHAZO EN EL CENTRO", url: "trap argentino/08  - YSY A x BHAVI ft. MILO J - FLECHAZO EN EL CENTRO (PROD. ONIRIA).mp3" },
+      { nombre: "Bhavi ft. Ecko - Piso", url: "trap argentino/Bhavi ft. Ecko - Piso (Prod. by Omar Varela).mp3" },
+      { nombre: "DUKI - GIVENCHY", url: "trap argentino/DUKI - GIVENCHY (Video Oficial).mp3" },
+      { nombre: "DUKI - Goteo", url: "trap argentino/DUKI - Goteo (Video Oficial).mp3" },
+      { nombre: "DUKI -Rockstar", url: "trap argentino/DUKI - Rockstar (Video Oficial).mp3" },
+      { nombre: "DUKI - She Don't Give a FO (ft. Khea)", url: "trap argentino/Duki - She Don't Give a FO (ft. Khea) Prod. by Omar Varela.mp3" },
+      { nombre: "DUKI, Ysy A, C.R.O - Hijo De La Noche", url: "trap argentino/DUKI, Ysy A, C.R.O - Hijo de la Noche (Video Oficial).mp3" },
+      { nombre: "ECKO - DORADO", url: "trap argentino/ECKO - DORADO (Prod. by Omar Varela).mp3" },
+      { nombre: "Khea - Loca ft. Duki & Cazzu", url: "trap argentino/Khea - Loca ft. Duki & Cazzu (Prod. Omar Varela & Mykka).mp3" },
+      { nombre: "Trueno, WOS - SANGRÍA", url: "trap argentino/Trueno, WOS - SANGRÍA  Atrevido.mp3" },
+      { nombre: "Tumbando el Club (Remix)", url: "trap argentino/Tumbando el Club (Remix) (Official VIdeo).mp3" }
     ]
   },
   {
-    titulo: "Reggaetón Vieja Escuela",
-    imagen: "https://i.imgur.com/1cw5tKD.jpg",
+    titulo: "Reggaetón Viejo",
+    imagen: "https://i1.sndcdn.com/avatars-Ja0cz1ZARCNmLw3B-20rHyw-t500x500.jpg",
     colorDegradado: "rgba(255, 193, 7, 0.6)",
     canciones: [
-      { nombre: "Gasolina", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-13.mp3" },
-      { nombre: "Lo Que Pasó, Pasó", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-14.mp3" },
-      { nombre: "Rakata", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-15.mp3" }
+      { nombre: "Nicky Jam - Hasta el Amanecer ", url: "reggaeton viejo/22. Hasta el Amanecer - Nicky Jam  Video Oficial - NickyJamTV.mp3" },
+      { nombre: "Hector y Tito ft. Don Omar", url: "reggaeton viejo/Baila Morena - Hector y Tito ft. Don Omar _ Glory ( Tiktok song, Lyrics Video) - LyricsForYou.mp3" },
+      { nombre: "Daddy Yankee - Lo Que Pasó Pasó", url: "reggaeton viejo/Daddy Yankee   Lo Que Paso Paso HQ - Neranjan manabharana.mp3" },
+      { nombre: "Daddy Yankee - Gasolina", url: "reggaeton viejo/Daddy Yankee - Gasolina - Music.mp3" },
+      { nombre: "Don Omar - Dile", url: "reggaeton viejo/Don Omar - Dile - Sonido Mix.mp3" },
+      { nombre: "Hector El Father - Noche De Travesura", url: "reggaeton viejo/Noche De Travesura - ( Hector El Father ) - Reggaetoneando.mp3" },
+      { nombre: "Tego Calderón - Pa' Que Retozen", url: "reggaeton viejo/Pa' Que Retozen - Tego Calderón.mp3" },
+      { nombre: "Nicky Jam - Si Tu No Estas", url: "reggaeton viejo/Si Tu No Estas - Nicky Jam Ft De la Ghetto  Video Oficial - NickyJamTV.mp3" },
+      { nombre: "Nicky Jam - Travesuras", url: "reggaeton viejo/Travesuras - Nicky Jam  Video Oficial - NickyJamTV.mp3" },
+      { nombre: "(feat. Daddy Yankee) - Zion & Lennox - Yo Voy", url: "reggaeton viejo/Yo Voy (feat. Daddy Yankee) - Zion & Lennox.mp3" },
+      { nombre: "Zion Ft. Eddie Dee - Amor De Pobre", url: "reggaeton viejo/Zion Ft. Eddie Dee - Amor de Pobre [Video Oficial] - Zion & Lennox.mp3" }
     ]
   },
   {
-    titulo: "Lo-Fi para Estudiar",
-    imagen: "https://i.imgur.com/xqGRcoF.jpg",
+    titulo: "Rap 90s",
+    imagen: "https://i.pinimg.com/474x/7b/0b/79/7b0b79d10a0d054f9e4240dc4467b864.jpg",
     colorDegradado: "rgba(108, 117, 125, 0.6)",
     canciones: [
-      { nombre: "Night Vibes", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-16.mp3" },
-      { nombre: "Rainy Study", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-17.mp3" },
-      { nombre: "Focus Loop", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-18.mp3" }
+      { nombre: "2Pac - All Eyez On Me", url: "rap 90's pa/2Pac - All Eyez On Me - Seven Hip-Hop.mp3" },
+      { nombre: "2Pac - Hit 'Em Up (Dirty)", url: "rap 90's pa/2Pac - Hit 'Em Up (Dirty) (Music Video) HD - Seven Hip-Hop.mp3" },
+      { nombre: "The Notorious B.I.G. - Big Poppa", url: "rap 90's pa/Big Poppa (2007 Remaster) - The Notorious B.I.G..mp3" },
+      { nombre: "Dr. Dre - Still D.R.E. ft. Snoop Dogg", url: "rap 90's pa/Dr. Dre - Still D.R.E. ft. Snoop Dogg - DrDreVEVO.mp3" },
+      { nombre: "Dr. Dre - The Next Episode ft. Snoop Dogg, Kurupt, Nate Dogg", url: "rap 90's pa/Dr. Dre - The Next Episode (Official Music Video) ft. Snoop Dogg, Kurupt, Nate Dogg - DrDreVEVO.mp3" },
+      { nombre: "Eazy E - Boyz-n-the-Hood", url: "rap 90's pa/Eazy E - Boyz-n-the-Hood (Music Video) - TheHipHopSyko.mp3" },
+      { nombre: "Eazy E - No More Question's", url: "rap 90's pa/Eazy E - No More Question's - TehRapChannel.mp3" },
+      { nombre: "Eazy E - Eazy-Duz-It", url: "rap 90's pa/Eazy-Duz-It - Ruthless Records.mp3" },
+      { nombre: "Eazy E - Real Muthaphuckkin G's", url: "rap 90's pa/Eazy-E - Real Muthaphuckkin G's (Music Video) - Creative Hip-Hop.mp3" },
+      { nombre: "Eminem - Stan", url: "rap 90's pa/Eminem - Stan (Long Version) ft. Dido - EminemVEVO.mp3" },
+      { nombre: "Eminem - The Real Slim Shady", url: "rap 90's pa/Eminem - The Real Slim Shady (Official Video - Clean Version) - EminemVEVO.mp3" },
+      { nombre: "Eminem - Without Me", url: "rap 90's pa/Eminem - Without Me (Official Music Video) - EminemVEVO.mp3" },
+      { nombre: "Ice Cube - It Was A Good Day", url: "rap 90's pa/Ice Cube - It Was A Good Day - IceCubeVEVO.mp3" },
+      { nombre: "Snoop Dogg ft. Pharrell Williams - Drop It Like It's Hot", url: "rap 90's pa/Snoop Dogg - Drop It Like It's Hot (Official Music Video) ft. Pharrell Williams - SnoopDoggVEVO.mp3" }
     ]
   },
   {
-    titulo: "Cumbia Villera",
-    imagen: "https://i.imgur.com/NB9FnND.jpg",
+    titulo: "Cumbia ",
+    imagen: "https://img.freepik.com/vector-premium/ilustracion-texto-cumbia-dibujada-mano_23-2150777894.jpg",
     colorDegradado: "rgba(220, 53, 69, 0.6)",
     canciones: [
-      { nombre: "La Cumbia de los Trapos", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-19.mp3" },
-      { nombre: "Soy Sabalero", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-20.mp3" },
-      { nombre: "El Tano Pasman", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-21.mp3" }
+      { nombre: "Antonio Rios - Nunca Me Faltes", url: "cumbia clasicos/Antonio Rios - Nunca me Faltes.mp3" },
+      { nombre: "Nestor En Bloque - Dejenlá Que Llore", url: "cumbia clasicos/Dejenlá Que Llore.mp3" },
+      { nombre: "La Nueva Luna - Hojita Seca", url: "cumbia clasicos/Hojita Seca.mp3" },
+      { nombre: "LA DELIO VALDEZ - INOCENTE (Vivo Gran Rex)", url: "cumbia clasicos/LA DELIO VALDEZ - INOCENTE - (Vivo en Gran Rex).mp3" },
+      { nombre: "Los Ángeles Azules - Cómo Te Voy A Olvidar", url: "cumbia clasicos/Los Ángeles Azules - Cómo Te Voy A Olvidar (Video Oficial).mp3" },
+      { nombre: "Los Ángeles Azules - Nunca Es Suficiente ft. Natalia Lafourcade", url: "cumbia clasicos/Los Ángeles Azules - Nunca Es Suficiente ft. Natalia Lafourcade (Live).mp3" },
+      { nombre: "Mario Luis - Voy A Olvidarme De Mí", url: "cumbia clasicos/Mario Luis - Voy A Olvidarme De Mi.mp3" },
+      { nombre: "Gilda - No Me Arrepiento De Este Amor", url: "cumbia clasicos/No Me Arrepiento de Este Amor.mp3" },
+      { nombre: "Yerba Brava - Pibe Cantina", url: "cumbia clasicos/Pibe Cantina.mp3" },
+      { nombre: "Mario Luis - Tu Historia Entre Mis Dedos", url: "cumbia clasicos/Tu Historia Entre Mis Dedos.mp3" },
+      { nombre: "Yerba Brava - La Cumbia De Los Trapos", url: "cumbia clasicos/Yerba Brava - La Cumbia de los Trapos.mp3" },
+      { nombre: "Amar Azul - Yo Tomo Licor", url: "cumbia clasicos/Yo Tomo Licor.mp3" }
     ]
   },
   {
-    titulo: "Metal Pesado",
-    imagen: "https://i.imgur.com/5xNRIxU.jpg",
+    titulo: "Heavy Metal Clasicos",
+    imagen: "https://images.cdn2.buscalibre.com/fit-in/360x360/f8/01/f801e5411aa5550906b439459ef42782.jpg",
     colorDegradado: "rgba(0, 0, 0, 0.6)",
     canciones: [
-      { nombre: "Master of Puppets", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-22.mp3" },
-      { nombre: "Painkiller", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-23.mp3" },
-      { nombre: "La Leyenda del Hada y el Mago", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-24.mp3" }
-    ]
-  },
-  {
-    titulo: "Internacionales Random",
-    imagen: "https://i.imgur.com/P2Fl9cq.jpg",
-    colorDegradado: "rgba(23, 162, 184, 0.6)",
-    canciones: [
-      { nombre: "Let It Happen", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-25.mp3" },
-      { nombre: "Yellow", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-26.mp3" },
-      { nombre: "Take On Me", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-27.mp3" }
-    ]
-  },
-  {
-    titulo: "Playlist Random",
-    imagen: "https://i.imgur.com/urqZUpc.jpg",
-    colorDegradado: "rgba(52, 58, 64, 0.6)",
-    canciones: [
-      { nombre: "Random Track 1", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-28.mp3" },
-      { nombre: "Random Track 2", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-29.mp3" },
-      { nombre: "Random Track 3", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-30.mp3" }
+      { nombre: "Metallica - Blackened", url: "heavy metal clasicos/Blackened (Remastered).mp3" },
+      { nombre: "System Of A Down - Chic N' Stu", url: "heavy metal clasicos/Chic 'N' Stu.mp3" },
+      { nombre: "Pantera - Floods", url: "heavy metal clasicos/Floods.mp3" },
+      { nombre: "Metallica - Harvester Of Sorrow", url: "heavy metal clasicos/Harvester of Sorrow (Remastered).mp3" },
+      { nombre: "Judas priest - Breaking The Law", url: "heavy metal clasicos/Judas Priest - Breaking The Law (Official Music Video).mp3" },
+      { nombre: "Judas Priest - Night Crawler", url: "heavy metal clasicos/Judas Priest - Night Crawler (Official Audio).mp3" },
+      { nombre: "Judas Priest - Painkiller", url: "heavy metal clasicos/Judas Priest - Painkiller.mp3" },
+      { nombre: "Metallica - Master Of Puppets", url: "heavy metal clasicos/Master of Puppets (Remastered).mp3" },
+      { nombre: "Metallica - Enter Sandman", url: "heavy metal clasicos/Metallica Enter Sandman (Official Music Video).mp3" },
+      { nombre: "Metallica - One", url: "heavy metal clasicos/Metallica One (Official Music Video).mp3" },
+      { nombre: "Slayer - Raining Blood", url: "heavy metal clasicos/Raining Blood.mp3" },
+      { nombre: "Rammstein - Du Hast", url: "heavy metal clasicos/Rammstein - Du Hast (Official 4K Video).mp3" },
+      { nombre: "Rammstein - Sonne", url: "heavy metal clasicos/Rammstein - Sonne (Official Video).mp3" },
+      { nombre: "Metallica - Seek And Destroy", url: "heavy metal clasicos/Seek & Destroy (Remastered).mp3" },
+      { nombre: "System Of A Down - Aerials", url: "heavy metal clasicos/System Of A Down - Aerials (Official HD Video).mp3" },
+      { nombre: "System Of A Down - B.Y.O.B.", url: "heavy metal clasicos/System Of A Down - B.Y.O.B. (Official HD Video).mp3" },
+      { nombre: "System Of A Down - Chop Suey!", url: "heavy metal clasicos/System Of A Down - Chop Suey! (Official HD Video).mp3" },
+      { nombre: "System Of A Down - Cigaro", url: "heavy metal clasicos/System Of A Down - Cigaro (Official Audio).mp3" },
+      { nombre: "System Of A Down - I-E-A-I-A-I-O", url: "heavy metal clasicos/System Of A Down - I-E-A-I-A-I-O (Official Audio).mp3" },
+      { nombre: "System Of A Down - Toxicity", url: "heavy metal clasicos/System Of A Down - Toxicity (Official HD Video).mp3" }
     ]
   }
 ];
 
+// --- Objeto Reproductor Unificado ---
+const Reproductor = {
+    playlist: [],
+    index: -1,
+    origen: null,
 
-// Render playlists (visibles)
-function renderizarPlaylists() {
-  playlistsContainer.innerHTML = "";
-  playlists.forEach((pl, index) => {
-    const div = document.createElement("div");
-    div.className = "playlist-item";
-    div.style.backgroundImage = `
-      linear-gradient(to top, ${pl.colorDegradado}, transparent),
-      url(${pl.imagen})
-    `;
-    div.innerHTML = `
-      <div class="playlist-overlay"></div>
-      <div class="playlist-content">
-        <h3>${pl.titulo}</h3>
-        <button class="btn-reproducir" data-index="${index}" title="Reproducir Playlist"><i class="fa-solid fa-play"></i></button>
-      </div>
-    `;
-    playlistsContainer.appendChild(div);
-  });
+    cargarPlaylist(listaCanciones, origen) {
+        this.playlist = listaCanciones;
+        this.index = 0;
+        this.origen = origen;
+        this.reproducir();
+        miniReproductor.style.display = "flex";
+    },
 
-  document.querySelectorAll(".btn-reproducir").forEach(btn => {
-    btn.addEventListener("click", e => iniciarReproduccion(parseInt(e.currentTarget.dataset.index)));
-  });
-}
+    reproducir() {
+        if (this.playlist.length === 0 || this.index === -1) {
+            this.parar();
+            return;
+        }
 
-// Iniciar reproducción playlist
-function iniciarReproduccion(idxPlaylist) {
-  playlistActualIndex = idxPlaylist;
-  cancionActualIndex = 0;
-  miniReproductor.style.display = "flex";
-  reproducirCancion();
-}
+        const cancion = this.playlist[this.index];
+        let url;
+        if (this.origen === "fija") {
+            url = cancion.url;
+        } else {
+            const mp3Local = archivosMP3.find(a => a.name === cancion.nombre);
+            if (!mp3Local) {
+                alert("Archivo MP3 no encontrado.");
+                return;
+            }
+            url = URL.createObjectURL(mp3Local.file);
+        }
 
-// Reproducir canción actual (playlist)
-function reproducirCancion() {
-  if (playlistActualIndex === -1) return; // MP3 local no pasa por acá
+        audio.src = url;
+        audio.play();
+        reproduciendo = true;
+        actualizarInfoMiniReproductor();
+        actualizarBotonPlayPause();
+    },
 
-  const playlist = playlists[playlistActualIndex];
-  if (!playlist || !playlist.canciones.length) return; // Por si no existe o está vacía
+ 
+    siguiente() {
+        if (this.playlist.length === 0) return;
+        if (modoAleatorio) {
+            let nuevoIndex;
+            do {
+                nuevoIndex = Math.floor(Math.random() * this.playlist.length);
+            } while (nuevoIndex === this.index && this.playlist.length > 1);
+            this.index = nuevoIndex;
+        } else {
+            this.index = (this.index + 1) % this.playlist.length;
+        }
+        this.reproducir();
+    },
 
-  const cancion = playlist.canciones[cancionActualIndex];
-  audio.src = cancion.url;
-  audio.play();
-  reproduciendo = true;
-  actualizarBotonPlayPause();
-  actualizarMiniReproductor();
-}
+    anterior() {
+        if (this.playlist.length === 0) return;
+        if (modoAleatorio) {
+            this.index = Math.floor(Math.random() * this.playlist.length);
+        } else {
+            this.index = (this.index - 1 + this.playlist.length) % this.playlist.length;
+        }
+        this.reproducir();
+    },
 
-// Actualiza mini reproductor con info de playlist
-function actualizarMiniReproductor() {
-  if (playlistActualIndex === -1) return; // MP3 local no pasa por acá
-
-  const playlist = playlists[playlistActualIndex];
-  if (!playlist) return;
-
-  const cancion = playlist.canciones[cancionActualIndex];
-  if (!cancion) return;
-
-  nombrePlaylistElem.textContent = `${playlist.titulo} — ${cancion.nombre}`;
-
-  listaCancionesElem.innerHTML = "";
-  playlist.canciones.forEach((c, i) => {
-    const li = document.createElement("li");
-    li.textContent = c.nombre;
-    if (i === cancionActualIndex) {
-      li.style.fontWeight = "bold";
-      li.style.color = body.classList.contains("modo-oscuro") ? "#a020f0" : "#0a3d91";
+    parar() {
+        audio.pause();
+        audio.currentTime = 0;
+        reproduciendo = false;
+        this.playlist = [];
+        this.index = -1;
+        this.origen = null;
+        actualizarBotonPlayPause();
     }
-    listaCancionesElem.appendChild(li);
-  });
+};
 
-  aplicarColoresModo();
+// --- Manejo de IndexedDB para guardar MP3 ---
+const DB_NAME = "miunaveDB";
+const DB_STORE = "mp3files";
+let db;
+let archivosMP3 = [];
+
+async function abrirDB() {
+    return new Promise((resolve, reject) => {
+        const request = indexedDB.open(DB_NAME, 1);
+        request.onerror = () => reject("Error abriendo DB");
+        request.onsuccess = () => {
+            db = request.result;
+            resolve(db);
+        };
+        request.onupgradeneeded = e => {
+            db = e.target.result;
+            if (!db.objectStoreNames.contains(DB_STORE)) {
+                db.createObjectStore(DB_STORE, { keyPath: "name" });
+            }
+        };
+    });
+}
+async function guardarArchivoMP3(file) {
+    return new Promise((resolve, reject) => {
+        const tx = db.transaction(DB_STORE, "readwrite");
+        const store = tx.objectStore(DB_STORE);
+        const req = store.put({ name: file.name, file: file });
+        req.onsuccess = () => resolve();
+        req.onerror = () => reject("Error guardando archivo");
+    });
+}
+async function obtenerTodosArchivos() {
+    return new Promise((resolve, reject) => {
+        const tx = db.transaction(DB_STORE, "readonly");
+        const store = tx.objectStore(DB_STORE);
+        const request = store.getAll();
+        request.onsuccess = () => resolve(request.result);
+        request.onerror = () => reject("Error obteniendo archivos");
+    });
+}
+async function eliminarArchivo(nombre) {
+    return new Promise((resolve, reject) => {
+        const tx = db.transaction(DB_STORE, "readwrite");
+        const store = tx.objectStore(DB_STORE);
+        const request = store.delete(nombre);
+        request.onsuccess = () => resolve();
+        request.onerror = () => reject("Error eliminando archivo");
+    });
+}
+async function cargarArchivosDB() {
+    archivosMP3 = await obtenerTodosArchivos();
 }
 
-// Play/pause
-btnPlayPause.addEventListener("click", () => {
-  if (reproduciendo) {
-    audio.pause();
-    reproduciendo = false;
-  } else {
-    audio.play();
-    reproduciendo = true;
-  }
-  actualizarBotonPlayPause();
+// --- Manejo de LocalStorage para Playlists ---
+const STORAGE_PLAYLISTS = "miunave_playlists";
+function obtenerPlaylists() {
+    const data = localStorage.getItem(STORAGE_PLAYLISTS);
+    if (!data) return [];
+    try {
+        return JSON.parse(data);
+    } catch {
+        return [];
+    }
+}
+function guardarPlaylists(playlists) {
+    localStorage.setItem(STORAGE_PLAYLISTS, JSON.stringify(playlists));
+}
+function crearPlaylist(nombre, urlPortada = "") {
+    if (!nombre.trim()) {
+        alert("El nombre de la playlist no puede estar vacío");
+        return false;
+    }
+    const playlists = obtenerPlaylists();
+    if (playlists.find(p => p.nombre.toLowerCase() === nombre.toLowerCase())) {
+        alert("Ya existe una playlist con ese nombre");
+        return false;
+    }
+    playlists.push({
+        nombre,
+        canciones: [],
+        portada: urlPortada
+    });
+    guardarPlaylists(playlists);
+    return true;
+}
+function eliminarPlaylist(nombre) {
+    let playlists = obtenerPlaylists();
+    playlists = playlists.filter(p => p.nombre !== nombre);
+    guardarPlaylists(playlists);
+}
+function agregarCancionAPlaylist(nombrePlaylist, nombreCancion) {
+    const playlists = obtenerPlaylists();
+    const playlist = playlists.find(p => p.nombre === nombrePlaylist);
+    if (!playlist) return false;
+    if (!playlist.canciones.find(c => c.nombre === nombreCancion)) {
+        playlist.canciones.push({ nombre: nombreCancion, url: null });
+        guardarPlaylists(playlists);
+        return true;
+    }
+    return false;
+}
+
+// --- Funciones de Renderizado ---
+function mostrarMP3s(filtro = "") {
+    const lista = document.getElementById("listaMP3");
+    lista.innerHTML = "";
+    const filtrados = archivosMP3.filter(a => a.name.toLowerCase().includes(filtro.toLowerCase()));
+    if (filtrados.length === 0) {
+        lista.innerHTML = "<li>No hay archivos que coincidan</li>";
+        return;
+    }
+    filtrados.forEach(({ name }) => {
+        const li = document.createElement("li");
+        li.style.cursor = "pointer";
+        li.classList.add("mp3-item");
+        
+        const checkbox = document.createElement("input");
+        checkbox.type = "checkbox";
+        checkbox.classList.add("mp3-checkbox");
+        checkbox.title = "Seleccionar para playlist";
+
+        const texto = document.createElement("span");
+        texto.textContent = name;
+        texto.style.flex = "1";
+        texto.addEventListener("click", () => {
+            // Corrige la lógica para cargar todos los MP3 locales en la playlist
+            const cancionesLocales = archivosMP3.map(a => ({ nombre: a.name, url: null }));
+            const indexSeleccionado = cancionesLocales.findIndex(c => c.nombre === name);
+            Reproductor.cargarPlaylist(cancionesLocales, "local");
+            Reproductor.index = indexSeleccionado;
+            Reproductor.reproducir();
+        });
+
+        const btnEliminar = document.createElement("button");
+        btnEliminar.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-trash-2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6l-2 14H7L5 6"></path><path d="M10 11v6"></path><path d="M14 11v6"></path><path d="M9 6V4h6v2"></path></svg>`;
+        btnEliminar.classList.add("btn-eliminar");
+        btnEliminar.title = "Eliminar archivo";
+        btnEliminar.addEventListener("click", async (e) => {
+            e.stopPropagation();
+            if (confirm(`Eliminar archivo "${name}"?`)) {
+                await eliminarArchivo(name);
+                await cargarArchivosDB();
+                mostrarMP3s(filtro);
+                alert(`Archivo "${name}" eliminado`);
+            }
+        });
+
+        li.appendChild(checkbox);
+        li.appendChild(texto);
+        li.appendChild(btnEliminar);
+        lista.appendChild(li);
+    });
+}
+
+window.addEventListener("DOMContentLoaded", async () => {
+    await abrirDB();
+    await cargarArchivosDB();
+    mostrarMP3s();
+    renderizarPlaylists();
 });
 
-// Actualiza ícono play/pause
+
+function renderizarPlaylists() {
+    playlistsContainer.innerHTML = "";
+    const playlistsGuardadas = obtenerPlaylists();
+    const todasLasPlaylists = playlists.concat(playlistsGuardadas);
+    
+    todasLasPlaylists.forEach((pl, index) => {
+        const div = document.createElement("div");
+        div.className = "playlist-item";
+        div.style.backgroundImage = `
+            linear-gradient(to top, ${pl.colorDegradado || 'rgba(0,0,0,0.6)'}, transparent),
+            url(${pl.imagen || pl.portada || ''})
+        `;
+        div.innerHTML = `
+            <div class="playlist-overlay"></div>
+            <div class="playlist-content">
+                <h3>${pl.titulo || pl.nombre}</h3>
+                <button class="btn-reproducir" data-index="${index}" title="Reproducir Playlist"><i class="fa-solid fa-play"></i></button>
+            </div>
+        `;
+
+        // Si la playlist es local (no tiene 'titulo'), agregamos botón de eliminar
+        if (!pl.titulo) {
+            const btnEliminarPL = document.createElement("button");
+            btnEliminarPL.innerHTML = `<i class="fa-solid fa-trash"></i>`;
+            btnEliminarPL.title = "Eliminar Playlist";
+            btnEliminarPL.classList.add("btn-eliminar-playlist");
+            btnEliminarPL.addEventListener("click", (e) => {
+                e.stopPropagation(); // Evita que se active el play
+                if (confirm(`Eliminar playlist "${pl.nombre}"?`)) {
+                    eliminarPlaylist(pl.nombre);
+                    renderizarPlaylists(); // Volvemos a renderizar
+                }
+            });
+            div.querySelector(".playlist-content").appendChild(btnEliminarPL);
+        }
+
+        playlistsContainer.appendChild(div);
+    });
+
+    document.querySelectorAll(".btn-reproducir").forEach(btn => {
+        btn.addEventListener("click", e => {
+            const index = parseInt(e.currentTarget.dataset.index);
+            const playlistSeleccionada = todasLasPlaylists[index];
+            const origen = playlistSeleccionada.titulo ? "fija" : "local";
+            if (origen === "local") {
+                playlistSeleccionada.canciones = playlistSeleccionada.canciones.map(c => ({ nombre: c.nombre, url: null }));
+            }
+            Reproductor.cargarPlaylist(playlistSeleccionada.canciones, origen);
+        });
+    });
+}
+
+
+function actualizarInfoMiniReproductor() {
+    if (Reproductor.playlist.length === 0) {
+        miniReproductor.style.display = "none";
+        return;
+    }
+    const cancion = Reproductor.playlist[Reproductor.index];
+    let tituloOrigen = Reproductor.origen === "fija" ? "Playlist" : "MP3 Local";
+    nombrePlaylistElem.textContent = `${tituloOrigen} — ${cancion.nombre}`;
+    listaCancionesElem.innerHTML = "";
+    Reproductor.playlist.forEach((c, i) => {
+        const li = document.createElement("li");
+        li.textContent = c.nombre;
+        if (i === Reproductor.index) {
+            li.style.fontWeight = "bold";
+            li.style.color = body.classList.contains("modo-oscuro") ? "#a020f0" : "#0a3d91";
+        }
+        li.addEventListener("click", () => {
+            Reproductor.index = i;
+            Reproductor.reproducir();
+        });
+        listaCancionesElem.appendChild(li);
+    });
+}
 function actualizarBotonPlayPause() {
-  btnPlayPause.innerHTML = reproduciendo ? `<i class="fa-solid fa-pause"></i>` : `<i class="fa-solid fa-play"></i>`;
-  if (!reproduciendo && audio.currentTime === 0) miniReproductor.style.display = "none";
+    btnPlayPause.innerHTML = reproduciendo ? `<i class="fa-solid fa-pause"></i>` : `<i class="fa-solid fa-play"></i>`;
+}
+function aplicarColoresModo() {
+    if (body.classList.contains("modo-oscuro")) {
+        btnShuffle.style.color = modoAleatorio ? "#a020f0" : "";
+        btnLoop.style.color = modoLoop ? "#a020f0" : "";
+    } else {
+        btnShuffle.style.color = modoAleatorio ? "#0a3d91" : "";
+        btnLoop.style.color = modoLoop ? "#0a3d91" : "";
+    }
+}
+function cargarSelectPlaylists() {
+    const selectPlaylists = document.getElementById("selectPlaylists");
+    if (!selectPlaylists) return;
+    selectPlaylists.innerHTML = `<option value="">-- Seleccioná playlist --</option>`;
+    const playlistsGuardadas = obtenerPlaylists();
+    playlistsGuardadas.forEach(({ nombre }) => {
+        const option = document.createElement("option");
+        option.value = nombre;
+        option.textContent = nombre;
+        selectPlaylists.appendChild(option);
+    });
 }
 
-// Siguiente canción
-btnNext.addEventListener("click", () => {
-  if (playlistActualIndex === -1) return; // No para MP3 local
 
-  const playlist = playlists[playlistActualIndex];
-  if (!playlist || !playlist.canciones.length) return;
 
-  if (modoAleatorio) {
-    cancionActualIndex = Math.floor(Math.random() * playlist.canciones.length);
-  } else {
-    cancionActualIndex = (cancionActualIndex + 1) % playlist.canciones.length;
-  }
-  reproducirCancion();
+// --- Eventos del Reproductor ---
+btnNext.addEventListener("click", () => Reproductor.siguiente());
+btnPrev.addEventListener("click", () => Reproductor.anterior());
+btnPlayPause.addEventListener("click", () => {
+    if (reproduciendo) {
+        audio.pause();
+    } else {
+        audio.play();
+    }
+});
+audio.addEventListener("ended", () => {
+    if (!modoLoop) { 
+        Reproductor.siguiente();
+    } else { 
+        audio.currentTime = 0;
+        audio.play();
+    }
 });
 
-// Canción anterior
-btnPrev.addEventListener("click", () => {
-  if (playlistActualIndex === -1) return; // No para MP3 local
-
-  const playlist = playlists[playlistActualIndex];
-  if (!playlist || !playlist.canciones.length) return;
-
-  if (modoAleatorio) {
-    cancionActualIndex = Math.floor(Math.random() * playlist.canciones.length);
-  } else {
-    cancionActualIndex = (cancionActualIndex - 1 + playlist.canciones.length) % playlist.canciones.length;
-  }
-  reproducirCancion();
+audio.addEventListener("pause", () => {
+    reproduciendo = false;
+    actualizarBotonPlayPause();
+});
+audio.addEventListener("play", () => {
+    reproduciendo = true;
+    miniReproductor.style.display = "flex";
+    actualizarBotonPlayPause();
+});
+audio.addEventListener("timeupdate", () => {
+    const progresoActual = (audio.currentTime / audio.duration) * 100 || 0;
+    barraProgreso.style.width = progresoActual + "%";
 });
 
-// Shuffle toggle
+btnLoop.addEventListener("click", () => {
+  modoLoop = !modoLoop;
+  if (modoLoop) {
+    btnLoop.style.color = body.classList.contains("modo-oscuro") ? "#a020f0" : "#0a3d91";
+  } else {
+    btnLoop.style.color = "";
+  }
+});
+
+
+const barraProgresoContainer = document.getElementById("barraProgresoContainer");
+barraProgresoContainer.addEventListener("click", e => {
+    const rect = barraProgresoContainer.getBoundingClientRect();
+    const clickX = e.clientX - rect.left;
+    const nuevoPorcentaje = clickX / rect.width;
+    audio.currentTime = nuevoPorcentaje * audio.duration;
+});
+
 btnShuffle.addEventListener("click", () => {
   modoAleatorio = !modoAleatorio;
   aplicarColoresModo();
 });
 
-// Loop toggle
-btnLoop.addEventListener("click", () => {
-  modoLoop = !modoLoop;
-  audio.loop = modoLoop;
-  aplicarColoresModo();
-});
-
-// Descargar canción actual (simulado)
 btnDownload.addEventListener("click", () => {
-  if (playlistActualIndex === -1) {
-    alert(`Descargando archivo local`);
-  } else {
-    const playlist = playlists[playlistActualIndex];
-    if (!playlist || !playlist.canciones.length) return;
-    alert(`Descargando: ${playlist.canciones[cancionActualIndex].nombre}`);
-  }
-});
-
-// Barra progreso actualización
-audio.addEventListener("timeupdate", () => {
-  const progresoActual = (audio.currentTime / audio.duration) * 100 || 0;
-  barraProgreso.style.width = progresoActual + "%";
-  barraProgreso.setAttribute("aria-valuenow", progresoActual.toFixed(2));
-});
-
-// Click barra para cambiar tiempo
-barraProgreso.parentElement.addEventListener("click", e => {
-  const barraPadre = barraProgreso.parentElement;
-  const rect = barraPadre.getBoundingClientRect();
-  const clickX = e.clientX - rect.left;
-  const nuevoPorcentaje = clickX / rect.width;
-  audio.currentTime = nuevoPorcentaje * audio.duration;
-});
-
-// Menú canciones playlist
-btnMenuCanciones.addEventListener("click", () => {
-  if (playlistActualIndex === -1) return; // No para MP3 local
-  menuCanciones.style.display = "flex";
-  listaMenuCanciones.innerHTML = "";
-
-  const playlist = playlists[playlistActualIndex];
-  if (!playlist || !playlist.canciones.length) return;
-
-  playlist.canciones.forEach((c, i) => {
-    const li = document.createElement("li");
-    li.textContent = c.nombre;
-    if (i === cancionActualIndex) li.classList.add("activa");
-    li.addEventListener("click", () => {
-      cancionActualIndex = i;
-      reproducirCancion();
-      menuCanciones.style.display = "none";
-    });
-    listaMenuCanciones.appendChild(li);
-  });
-});
-btnCerrarMenu.addEventListener("click", () => {
-  menuCanciones.style.display = "none";
-});
-
-// Navegación
-document.querySelectorAll(".btn-nav").forEach(boton => {
-  boton.addEventListener("click", () => {
-    document.querySelectorAll(".btn-nav").forEach(b => b.classList.remove("activo"));
-    boton.classList.add("activo");
-    document.querySelectorAll("main.contenido > section").forEach(seccion => seccion.classList.add("seccion-oculta"));
-    document.getElementById(boton.getAttribute("data-seccion")).classList.remove("seccion-oculta");
-
-    // Mostrar/ocultar chat
-    const chatSection = document.getElementById("chatSection");
-    if (boton.getAttribute("data-seccion") === "chats") {
-      chatSection.style.display = "block";
-    } else {
-      chatSection.style.display = "none";
+    if (Reproductor.index === -1) {
+        alert("No hay una canción en reproducción para descargar.");
+        return;
     }
 
-    aplicarColoresModo();
-  });
+    const cancionActual = Reproductor.playlist[Reproductor.index];
+
+    // Lógica para descargar archivos locales 
+    if (Reproductor.origen === "local") {
+        const mp3Local = archivosMP3.find(a => a.name === cancionActual.nombre);
+        if (mp3Local && mp3Local.file) {
+            const url = URL.createObjectURL(mp3Local.file);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = can36cionActual.nombre;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            alert(`Descargando: ${cancionActual.nombre}`);
+        } else {
+            alert("No se pudo encontrar el archivo local para descargar.");
+        }
+    } 
+  
+    else if (Reproductor.origen === "fija") {
+        const a = document.createElement('a');
+        a.href = cancionActual.url;
+        a.download = cancionActual.nombre + ".mp3";
+        a.target = "_blank"; 
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        alert(`Descargando: ${cancionActual.nombre}`);
+    } else {
+        alert("No se puede descargar esta canción.");
+    }
 });
 
-// Configuración modo oscuro/claro
-configBtn.addEventListener("click", () => {
-  menuConfig.style.display = menuConfig.style.display === "block" ? "none" : "block";
+btnMenuCanciones.addEventListener("click", () => {
+    if (Reproductor.playlist.length === 0) return;
+    menuCanciones.style.display = "flex";
+    listaMenuCanciones.innerHTML = "";
+    Reproductor.playlist.forEach((c, i) => {
+        const li = document.createElement("li");
+        li.textContent = c.nombre;
+        if (i === Reproductor.index) li.classList.add("activa");
+        li.addEventListener("click", () => {
+            Reproductor.index = i;
+            Reproductor.reproducir();
+            menuCanciones.style.display = "none";
+        });
+        listaMenuCanciones.appendChild(li);
+    });
 });
-toggleModo.addEventListener("click", () => {
-  body.classList.toggle("modo-oscuro");
-  body.classList.toggle("modo-claro");
-  toggleModo.textContent = body.classList.contains("modo-oscuro") ? "Cambiar a Modo Claro" : "Cambiar a Modo Oscuro";
-  aplicarColoresModo();
-});
+btnCerrarMenu.addEventListener("click", () => menuCanciones.style.display = "none");
 
-// Escuchar búsqueda MP3
-const busquedaInput = document.getElementById("busquedaMP3");
-if (busquedaInput) {
-  busquedaInput.addEventListener("input", (e) => {
-    mostrarMP3s(e.target.value);
-  });
-}
-
-// Mostrar lista al entrar a Descargas
-const botonDescargas = document.getElementById("botonDescargas");
-if (botonDescargas) {
-  botonDescargas.addEventListener("click", async () => {
+const btnCargarCarpeta = document.getElementById("btnCargarCarpeta");
+const inputFolder = document.getElementById("inputFolder");
+const inputMP3 = document.getElementById("inputMP3");
+btnCargarCarpeta.addEventListener("click", () => inputFolder.click());
+inputFolder.addEventListener("change", async (e) => {
+    const files = Array.from(e.target.files);
+    let mp3Count = 0;
+    for (const file of files) {
+        if (file.type === "audio/mpeg" || file.name.toLowerCase().endsWith(".mp3")) {
+            await guardarArchivoMP3(file);
+            mp3Count++;
+        }
+    }
     await cargarArchivosDB();
     mostrarMP3s();
-  });
+    inputFolder.value = "";
+    alert(`Se cargaron ${mp3Count} archivos MP3.`);
+});
+inputMP3.addEventListener("change", async (e) => {
+    const files = Array.from(e.target.files);
+    let mp3Count = 0;
+    for (const file of files) {
+        if (file.type === "audio/mpeg" || file.name.toLowerCase().endsWith(".mp3")) {
+            await guardarArchivoMP3(file);
+            mp3Count++;
+        }
+    }
+    if (mp3Count === 0) {
+        alert("No se cargó ningún archivo MP3 válido.");
+    } else {
+        await cargarArchivosDB();
+        mostrarMP3s();
+        alert(`Se cargaron ${mp3Count} archivo(s) MP3.`);
+    }
+    inputMP3.value = "";
+});
+const btnCrearPlaylist = document.getElementById("btnCrearPlaylist");
+const inputNombrePlaylist = document.getElementById("inputNombrePlaylist");
+if (btnCrearPlaylist && inputNombrePlaylist) {
+    btnCrearPlaylist.addEventListener("click", () => {
+        const nombre = inputNombrePlaylist.value.trim();
+        if (crearPlaylist(nombre)) {
+            inputNombrePlaylist.value = "";
+            renderizarPlaylists();
+            cargarSelectPlaylists();
+            alert(`Playlist "${nombre}" creada!`);
+        }
+    });
+}
+const btnAgregarSeleccionados = document.getElementById("btnAgregarSeleccionados");
+const selectPlaylists = document.getElementById("selectPlaylists");
+if (btnAgregarSeleccionados && selectPlaylists) {
+    btnAgregarSeleccionados.addEventListener("click", () => {
+        const checkboxes = document.querySelectorAll(".mp3-checkbox:checked");
+        if (checkboxes.length === 0) {
+            alert("Seleccioná al menos una canción para agregar");
+            return;
+        }
+        const playlistNombre = selectPlaylists.value;
+        if (!playlistNombre) {
+            alert("Seleccioná una playlist para agregar las canciones");
+            return;
+        }
+        let agregadoAlgo = false;
+        checkboxes.forEach(cb => {
+            const li = cb.parentElement;
+            const nombreCancion = li.querySelector("span").textContent;
+            if (agregarCancionAPlaylist(playlistNombre, nombreCancion)) {
+                agregadoAlgo = true;
+            }
+        });
+        if (agregadoAlgo) {
+            alert(`Canciones agregadas a la playlist "${playlistNombre}"`);
+            renderizarPlaylists();
+        } else {
+            alert("Las canciones ya estaban en la playlist");
+        }
+        checkboxes.forEach(cb => cb.checked = false);
+    });
+}
+const busquedaInput = document.getElementById("busquedaMP3");
+if (busquedaInput) {
+    busquedaInput.addEventListener("input", (e) => {
+        mostrarMP3s(e.target.value);
+    });
+}
+const botonDescargas = document.getElementById("botonDescargas");
+if (botonDescargas) {
+    botonDescargas.addEventListener("click", async () => {
+        await cargarArchivosDB();
+        mostrarMP3s();
+    });
 }
 
-// CHAT - Variables y funciones
+// Obtiene una referencia al botón de borrado masivo
+const btnEliminarTodo = document.getElementById("eliminarTodoMP3");
+
+// Función para borrar todos los archivos MP3 del IndexedDB
+async function eliminarTodosLosArchivos() {
+    return new Promise((resolve, reject) => {
+        const tx = db.transaction(DB_STORE, "readwrite");
+        const store = tx.objectStore(DB_STORE);
+        const request = store.clear();
+        request.onsuccess = () => resolve();
+        request.onerror = () => reject("Error eliminando todos los archivos.");
+    });
+}
+
+// Evento para el botón de borrado masivo
+btnEliminarTodo.addEventListener("click", async () => {
+    if (confirm("¿Estás seguro de que quieres eliminar TODOS los archivos MP3 locales? Esta acción es irreversible.")) {
+        try {
+            await eliminarTodosLosArchivos();
+            await cargarArchivosDB(); 
+            mostrarMP3s(); 
+            alert("Todos los archivos MP3 han sido eliminados.");
+            if (Reproductor.origen === "local") {
+                Reproductor.parar(); 
+            }
+        } catch (error) {
+            console.error("Error al eliminar los archivos:", error);
+            alert("Hubo un error al intentar eliminar los archivos.");
+        }
+    }
+});
+
 const chatSection = document.getElementById("chatSection");
 const chatUsers = document.querySelectorAll(".chat-user");
 const chatHeader = document.getElementById("chatHeader");
 const chatMessages = document.getElementById("chatMessages");
 const chatInput = document.getElementById("chatInput");
 const sendMsgBtn = document.getElementById("sendMsgBtn");
-
 let chatActual = null;
-
-// Al hacer clic en un usuario
 chatUsers.forEach(user => {
-  user.addEventListener("click", () => {
-    chatActual = user.dataset.user;
-    chatHeader.textContent = `Chat con ${user.querySelector("span").textContent}`;
-    cargarMensajes(chatActual);
-  });
+    user.addEventListener("click", () => {
+        chatActual = user.dataset.user;
+        chatHeader.textContent = `Chat con ${user.querySelector("span").textContent}`;
+        cargarMensajes(chatActual);
+    });
 });
-
-// Enviar mensaje
 sendMsgBtn.addEventListener("click", () => {
-  const texto = chatInput.value.trim();
-  if (!texto || !chatActual) return;
-
-  guardarMensaje(chatActual, "enviado", texto);
-  mostrarMensaje("enviado", texto);
-  chatInput.value = "";
+    const texto = chatInput.value.trim();
+    if (!texto || !chatActual) return;
+    guardarMensaje(chatActual, "enviado", texto);
+    mostrarMensaje("enviado", texto);
+    chatInput.value = "";
 });
-
-// Mostrar mensajes previos del chat
-function cargarMensajes(usuario) {
-  chatMessages.innerHTML = "";
-  const historial = JSON.parse(localStorage.getItem("chat_" + usuario)) || [];
-  historial.forEach(msg => {
-    mostrarMensaje(msg.tipo, msg.texto);
-  });
-}
-
-// Mostrar un mensaje en pantalla
-function mostrarMensaje(tipo, texto) {
-  const div = document.createElement("div");
-  div.className = `mensaje ${tipo}`;
-  div.textContent = texto;
-  chatMessages.appendChild(div);
-  chatMessages.scrollTop = chatMessages.scrollHeight;
-}
-
-// Guardar en localStorage
-function guardarMensaje(usuario, tipo, texto) {
-  const historial = JSON.parse(localStorage.getItem("chat_" + usuario)) || [];
-  historial.push({ tipo, texto });
-  localStorage.setItem("chat_" + usuario, JSON.stringify(historial));
-}
-
-// Función para aplicar colores según modo
-function aplicarColoresModo() {
-  if (body.classList.contains("modo-oscuro")) {
-    btnShuffle.style.color = modoAleatorio ? "#a020f0" : "";
-    btnLoop.style.color = modoLoop ? "#a020f0" : "";
-  } else {
-    btnShuffle.style.color = modoAleatorio ? "#0a3d91" : "";
-    btnLoop.style.color = modoLoop ? "#0a3d91" : "";
-  }
-}
-
-// Ocultar mini reproductor al inicio
-miniReproductor.style.display = "none";
-
-// Inicialización DB y carga inicial
-abrirDB().then(async () => {
-  await cargarArchivosDB();
-  renderizarPlaylists();
-  aplicarColoresModo();
-  if (typeof lucide !== "undefined" && lucide.createIcons) lucide.createIcons(); // JIT icons
-});
-// Cuando termina la canción, ir a la siguiente según modo
-audio.addEventListener("ended", () => {
-  if (playlistActualIndex === -1) {
-    // Si es archivo local, no hacemos nada (no hay lista)
-    reproduciendo = false;
-    actualizarBotonPlayPause();
-    return;
-  }
-
-  if (modoLoop) {
-    audio.currentTime = 0;
-    audio.play();
-  } else if (modoAleatorio) {
-    const playlist = playlists[playlistActualIndex];
-    cancionActualIndex = Math.floor(Math.random() * playlist.canciones.length);
-    reproducirCancion();
-  } else {
-    const playlist = playlists[playlistActualIndex];
-    cancionActualIndex++;
-    if (cancionActualIndex >= playlist.canciones.length) {
-      cancionActualIndex = 0; // vuelve al principio
+chatInput.addEventListener("keydown", function(event) {
+    if (event.key === "Enter" && !event.shiftKey) {
+        event.preventDefault();
+        sendMsgBtn.click();
     }
-    reproducirCancion();
+});
+function cargarMensajes(usuario) {
+    chatMessages.innerHTML = "";
+    const historial = JSON.parse(localStorage.getItem("chat_" + usuario)) || [];
+    historial.forEach(msg => {
+        mostrarMensaje(msg.tipo, msg.texto);
+    });
+}
+function mostrarMensaje(tipo, texto) {
+    const div = document.createElement("div");
+    div.className = `mensaje ${tipo}`;
+    div.textContent = texto;
+    chatMessages.appendChild(div);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+}
+function guardarMensaje(usuario, tipo, texto) {
+    const historial = JSON.parse(localStorage.getItem("chat_" + usuario)) || [];
+    historial.push({
+        tipo,
+        texto
+    });
+    localStorage.setItem("chat_" + usuario, JSON.stringify(historial));
+}
+configBtn.addEventListener("click", () => menuConfig.style.display = menuConfig.style.display === "block" ? "none" : "block");
+toggleModo.addEventListener("click", () => {
+    body.classList.toggle("modo-oscuro");
+    body.classList.toggle("modo-claro");
+    toggleModo.textContent = body.classList.contains("modo-oscuro") ? "Cambiar a Modo Claro" : "Cambiar a Modo Oscuro";
+    aplicarColoresModo();
+});
+
+// Restaurar modo guardado
+const modoGuardado = localStorage.getItem("modo");
+if (modoGuardado === "oscuro") {
+  body.classList.add("oscuro");
+}
+
+// Cambiar y guardar modo
+toggleModo.addEventListener("click", () => {
+  body.classList.toggle("oscuro");
+  if (body.classList.contains("oscuro")) {
+    localStorage.setItem("modo", "oscuro");
+  } else {
+    localStorage.setItem("modo", "claro");
   }
 });
 
-// Para que el mini reproductor cierre al pausar y no estar vacío
-audio.addEventListener("pause", () => {
-  reproduciendo = false;
-  actualizarBotonPlayPause();
+window.addEventListener("DOMContentLoaded", () => {
+    const modoGuardado = localStorage.getItem("modoOscuro");
+    if (modoGuardado === "true") {
+        body.classList.add("modo-oscuro");
+    } else {
+        body.classList.remove("modo-oscuro");
+    }
+    aplicarColoresModo();
 });
 
-// Para que el mini reproductor se abra si la canción comienza a reproducirse
-audio.addEventListener("play", () => {
-  reproduciendo = true;
-  miniReproductor.style.display = "flex";
-  actualizarBotonPlayPause();
+document.querySelectorAll(".btn-nav").forEach(boton => {
+    boton.addEventListener("click", () => {
+        document.querySelectorAll(".btn-nav").forEach(b => b.classList.remove("activo"));
+        boton.classList.add("activo");
+        document.querySelectorAll("main.contenido > section").forEach(seccion => seccion.classList.add("seccion-oculta"));
+        document.getElementById(boton.getAttribute("data-seccion")).classList.remove("seccion-oculta");
+        const chatSection = document.getElementById("chatSection");
+        if (boton.getAttribute("data-seccion") === "chats") {
+            chatSection.style.display = "block";
+        } else {
+            chatSection.style.display = "none";
+        }
+        aplicarColoresModo();
+    });
 });
-
-// Al cargar página, por si hay modo oscuro guardado (opcional)
-if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-  body.classList.add("modo-oscuro");
-  body.classList.remove("modo-claro");
-  toggleModo.textContent = "Cambiar a Modo Claro";
-} else {
-  body.classList.add("modo-claro");
-  body.classList.remove("modo-oscuro");
-  toggleModo.textContent = "Cambiar a Modo Oscuro";
+// Inicialización
+async function inicializar() {
+    await abrirDB();
+    await cargarArchivosDB();
+    renderizarPlaylists();
+    cargarSelectPlaylists();
+    aplicarColoresModo();
+    miniReproductor.style.display = "none";
 }
-aplicarColoresModo();
+window.addEventListener("load", inicializar);
 
 
