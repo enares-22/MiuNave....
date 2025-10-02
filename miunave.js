@@ -856,39 +856,106 @@ function guardarMensaje(usuario, tipo, texto) {
     });
     localStorage.setItem("chat_" + usuario, JSON.stringify(historial));
 }
-configBtn.addEventListener("click", () => menuConfig.style.display = menuConfig.style.display === "block" ? "none" : "block");
-toggleModo.addEventListener("click", () => {
-    body.classList.toggle("modo-oscuro");
-    body.classList.toggle("modo-claro");
-    toggleModo.textContent = body.classList.contains("modo-oscuro") ? "Cambiar a Modo Claro" : "Cambiar a Modo Oscuro";
-    aplicarColoresModo();
-});
 
-// Restaurar modo guardado
-const modoGuardado = localStorage.getItem("modo");
-if (modoGuardado === "oscuro") {
-  body.classList.add("oscuro");
-}
+// ----------------------
+// Lógica arreglada modo / menu / login
+// ----------------------
+document.addEventListener('DOMContentLoaded', () => {
+  const body = document.body;
+  const configBtn = document.getElementById('configBtn');
+  const menuConfig = document.getElementById('menuConfig');
+  const toggleModo = document.getElementById('toggleModo');
+  const btnAbrirLogin = document.getElementById('btnAbrirLogin');
+  const loginFormContainer = document.getElementById('loginFormContainer');
+  const emailInput = document.getElementById('email');
 
-// Cambiar y guardar modo
-toggleModo.addEventListener("click", () => {
-  body.classList.toggle("oscuro");
-  if (body.classList.contains("oscuro")) {
-    localStorage.setItem("modo", "oscuro");
-  } else {
-    localStorage.setItem("modo", "claro");
+  // Safety: si no existen elementos, salimos sin romper todo
+  if (!configBtn || !menuConfig || !toggleModo) {
+    // No hay elementos críticos, nada que hacer
+    return;
   }
+
+  // Helper: mostrar / ocultar por inline style (no toca clases)
+  const toggleDisplay = (el, display = 'block') => {
+    if (!el) return false;
+    const shown = el.style.display === display;
+    el.style.display = shown ? 'none' : display;
+    return !shown;
+  };
+
+  // --- Restaurar modo desde localStorage (clave: "modo") ---
+  const modoGuardado = localStorage.getItem('modo'); // 'oscuro' o 'claro' o null
+  if (modoGuardado === 'oscuro') {
+    body.classList.add('modo-oscuro');
+    body.classList.remove('modo-claro');
+    toggleModo.textContent = 'Cambiar a Modo Claro';
+  } else {
+    body.classList.remove('modo-oscuro');
+    body.classList.add('modo-claro');
+    toggleModo.textContent = 'Cambiar a Modo Oscuro';
+  }
+
+  // Si existe la función aplicarColoresModo, llamarla (protección)
+  if (typeof aplicarColoresModo === 'function') aplicarColoresModo();
+
+  // --- Abrir/ocultar menú al clic en la ruedita ---
+  configBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const opened = toggleDisplay(menuConfig, 'block');
+    configBtn.setAttribute('aria-expanded', String(opened));
+    if (opened) {
+      // foco al primer control visible para accesibilidad
+      const primerControl = menuConfig.querySelector('button, input, [tabindex]');
+      if (primerControl) primerControl.focus();
+    } else {
+      // si cerramos el menú, también cerramos el formulario de login
+      if (loginFormContainer) loginFormContainer.style.display = 'none';
+    }
+  });
+
+  // Evitar que clicks dentro del menú lo cierren (listener global)
+  menuConfig.addEventListener('click', (ev) => ev.stopPropagation());
+
+  // --- Toggle modo (único listener, consistente y guarda en localStorage) ---
+  toggleModo.addEventListener('click', () => {
+    const isOscuro = body.classList.toggle('modo-oscuro'); // si quedó activa
+    body.classList.toggle('modo-claro', !isOscuro);
+    toggleModo.textContent = isOscuro ? 'Cambiar a Modo Claro' : 'Cambiar a Modo Oscuro';
+    localStorage.setItem('modo', isOscuro ? 'oscuro' : 'claro');
+    if (typeof aplicarColoresModo === 'function') aplicarColoresModo();
+  });
+
+  // --- Mostrar/ocultar formulario login dentro del menú ---
+  if (btnAbrirLogin && loginFormContainer) {
+    btnAbrirLogin.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const opened = toggleDisplay(loginFormContainer, 'block');
+      if (opened && emailInput) setTimeout(() => emailInput.focus(), 50);
+    });
+  }
+
+  // --- Cerrar menú / formulario si se clickea fuera ---
+  document.addEventListener('click', (e) => {
+    if (!menuConfig.contains(e.target) && e.target !== configBtn) {
+      menuConfig.style.display = 'none';
+      configBtn.setAttribute('aria-expanded', 'false');
+      if (loginFormContainer) loginFormContainer.style.display = 'none';
+    }
+  });
+
+  // --- Cerrar con ESC ---
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      if (loginFormContainer && loginFormContainer.style.display === 'block') {
+        loginFormContainer.style.display = 'none';
+      } else if (menuConfig && menuConfig.style.display === 'block') {
+        menuConfig.style.display = 'none';
+        configBtn.setAttribute('aria-expanded', 'false');
+      }
+    }
+  });
 });
 
-window.addEventListener("DOMContentLoaded", () => {
-    const modoGuardado = localStorage.getItem("modoOscuro");
-    if (modoGuardado === "true") {
-        body.classList.add("modo-oscuro");
-    } else {
-        body.classList.remove("modo-oscuro");
-    }
-    aplicarColoresModo();
-});
 
 document.querySelectorAll(".btn-nav").forEach(boton => {
     boton.addEventListener("click", () => {
@@ -961,6 +1028,74 @@ document.querySelectorAll(".btn-nav").forEach(boton => {
     });
   });
 
+// AJAX login/registro a miunave.php
+document.addEventListener('DOMContentLoaded', () => {
+  const loginForm = document.getElementById('loginForm');
+  const submitBtn = loginForm?.querySelector('button[type="submit"]');
+
+  if (!loginForm) return;
+
+  loginForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    if (submitBtn) submitBtn.disabled = true;
+
+    const formData = new FormData(loginForm);
+
+    try {
+      const res = await fetch('miunave.php', {
+        method: 'POST',
+        headers: { 'X-Requested-With': 'XMLHttpRequest' },
+        body: formData,
+        credentials: 'same-origin'
+      });
+
+      if (!res.ok) {
+        // lectura tentativa del body para mostrar error
+        const txt = await res.text().catch(() => '');
+        console.error('Respuesta inesperada:', res.status, txt);
+        mostrarError('Error del servidor. Código: ' + res.status);
+        return;
+      }
+
+      const data = await res.json().catch(() => null);
+      if (!data) {
+        mostrarError('Respuesta inválida del servidor.');
+        return;
+      }
+
+      if (data.success) {
+        // cerrar menú y mostrar username en UI
+        cerrarMenuLogin(); // función que ya tenés o definí
+        mostrarUsuarioEnUI(data.user.username || document.getElementById('username').value);
+        mostrarToast(data.msg || 'Bienvenido');
+      } else {
+        mostrarError(data.msg || 'Login fallido');
+      }
+
+    } catch (err) {
+      console.error(err);
+      mostrarError('No se pudo conectar al servidor.');
+    } finally {
+      if (submitBtn) submitBtn.disabled = false;
+    }
+  });
+
+  // funciones placeholder: adaptalas a tu UI
+  function cerrarMenuLogin() {
+    const menu = document.getElementById('menuConfig');
+    const loginContainer = document.getElementById('loginFormContainer');
+    if (menu) menu.style.display = 'none';
+    if (loginContainer) loginContainer.style.display = 'none';
+    document.getElementById('configBtn')?.setAttribute('aria-expanded', 'false');
+  }
+  function mostrarUsuarioEnUI(username) {
+    const icon = document.querySelector('.config-icon');
+    if (icon) icon.innerHTML = `<span class="usuario-nombre">${escapeHtml(username)}</span>`;
+  }
+  function mostrarError(msg) { alert(msg); }
+  function mostrarToast(msg) { console.log(msg); }
+  function escapeHtml(s){ return String(s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+});
 
 // Inicialización
 async function inicializar() {
