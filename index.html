@@ -9,13 +9,29 @@
  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet" />
 </head>
 <body class="modo-claro">
-  <header>
+    <header>
     <h1 class="titulo">MiuNave</h1>
-    <div class="config-icon" id="configBtn" title="Configuración">
+
+    <!-- Ruedita (config) -->
+    <div class="config-icon" id="configBtn" title="Configuración" aria-haspopup="true" aria-expanded="false">
       <i data-lucide="settings" class="icono-config"></i>
     </div>
-    <div class="menu-config" id="menuConfig" style="display:none;">
-      <button id="toggleModo">Cambiar a Modo Oscuro</button>
+
+
+    <div class="menu-config" id="menuConfig" style="display:none;" role="dialog" aria-label="Configuración">
+      <button id="toggleModo" type="button">Cambiar a Modo Oscuro</button>
+      <hr>
+      <button id="btnAbrirLogin" type="button">Iniciar sesión / Registrarse</button>
+
+
+      <div id="loginFormContainer" style="display:none; margin-top:10px;">
+        <form id="loginForm" action="miunave.php" method="POST" autocomplete="on">
+          <input type="email" name="email" id="email" placeholder="Gmail" required />
+          <input type="password" name="password" id="password" placeholder="Contraseña" required />
+          <input type="text" name="username" id="username" placeholder="Nuevo nombre de usuario" required />
+          <button type="submit">Enviar</button>
+        </form>
+      </div>
     </div>
   </header>
 
@@ -247,5 +263,6 @@
   </script>
 </body>
 </html>
+
 
 
